@@ -1,2 +1,8 @@
 node_modules
 dist
+
+# Local env files (keep .env.example committed)
+.env
+.env.local
+.env.*.local
+.DS_Store
