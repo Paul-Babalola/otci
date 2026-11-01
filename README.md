@@ -144,3 +144,10 @@ The engine also still carries the bridge-scene code (`bridgeScene`, `carSVG`,
 `startScene`'s `#scene` branch) that the old hero used. The landing page doesn't
 render it — `startScene()` is what boots the panorama — but it's left in place
 rather than cut, in case you want that hero back.
+
+## OTCI API
+
+`src/api/` is a client for the OTCI backend (all 78 requests in the Postman
+collection). Copy `.env.example` to `.env.local` and set `VITE_API_BASE_URL`.
+Setup, usage, problems in the spec and missing APIs are in
+[`docs/api-integration.md`](docs/api-integration.md).
