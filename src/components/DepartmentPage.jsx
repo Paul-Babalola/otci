@@ -2,19 +2,20 @@ import { useMemo } from 'react';
 import { pages } from '../otci/engine.js';
 import Page from './Page.jsx';
 
-/** The four department keys, in the order the nav lists them. */
-export const DEPARTMENTS = ['bos', 'ci', 'reforms', 'ms'];
+/** The department page keys, in the order the nav lists them. */
+export const DEPARTMENTS = ['bos', 'ci', 'reforms', 'ms', 'non-technical'];
 
 export const DEPARTMENT_NAMES = {
   bos: 'Branding, One-Stop & Service Charter',
   ci: 'Creativity & Innovation',
   reforms: 'Reforms',
-  ms: 'Management Services',
+  ms: 'Management Consulting Services',
+  'non-technical': 'Non-technical departments',
 };
 
 /**
  * A department page.
- * @param {'bos'|'ci'|'reforms'|'ms'} dept
+ * @param {'bos'|'ci'|'reforms'|'ms'|'non-technical'} dept
  */
 export default function DepartmentPage({ dept }) {
   const page = pages[dept];

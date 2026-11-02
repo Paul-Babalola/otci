@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import {
   ribbons, reveals, startScene, stopScene, gvInit, hwInit, storyInit,
   textFx, hlFx, btnFx, onScroll, resetStep, stopStory, bindHighlightFilter,
-  wireBos, wireGallery, lbxInit, cxFx, chatFx, dpFx, aboutFx,
+  wireBos, wireGallery, lbxInit, cxFx, chatFx, dpFx, aboutFx, ntFx, pgFx, qpFx,
 } from '../otci/engine.js';
 
 /**
@@ -41,6 +41,9 @@ export default function usePageEffects(accent = '#008751', opts = {}) {
     aboutFx();      // About statement reveal
     lbxInit();      // gallery lightbox
     dpFx();         // department page effects
+    ntFx();         // non-technical departments page
+    pgFx();         // Ideas Day photo grid (C&I)
+    qpFx();         // quarterly service performance list (BOS)
     chatFx();       // department chat box
     cxFx();         // one-stop / charter explorer
 

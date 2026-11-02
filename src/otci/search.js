@@ -177,7 +177,10 @@ export function buildIndex(data) {
         ...norm(key).split(' ')],
       'Service charter');
     (MDAS[key] || []).forEach((row) => {
-      add(row[0], 'service', { href: '#bos/standards' },
+      // Rows are charter service objects ({ name, ... }); older data used [name, time, fee].
+      const svc = Array.isArray(row) ? row[0] : row && row.name;
+      if (!svc) return;
+      add(svc, 'service', { href: '#bos/standards' },
         [...norm(name).split(' '), 'charter', 'service', 'standard'], name);
     });
   });

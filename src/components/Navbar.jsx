@@ -8,7 +8,7 @@ import logo from '../assets/otci-logo.jpg';
  * `links` lets you repoint the nav at your app's real routes. The default
  * values are the original hash routes.
  */
-const DEPT_KEYS = ['bos', 'ci', 'reforms', 'ms'];
+const DEPT_KEYS = ['bos', 'ci', 'reforms', 'ms', 'non-technical'];
 
 export default function Navbar({
   links = {
@@ -81,22 +81,57 @@ export default function Navbar({
 
           <div className="nav-m">
             <button type="button" className="mbtn" data-act="feedback" onClick={feedback}>
-              Share feedback
+              Share your experience
+            </button>
+            <button type="button" className="mbtn ghost" data-act="idea">
+              Ideas Day Innovation Competition
             </button>
           </div>
         </nav>
 
         <div className="nav-r">
-          <button type="button" className="hd-cta" data-act="feedback" onClick={feedback}>
-            Share feedback
-            <svg
-              width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-              strokeLinejoin="round" aria-hidden="true"
+          <div className="dd qa">
+            <button
+              type="button"
+              className="hd-cta"
+              id="qaBtn"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="qaMenu"
             >
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
-          </button>
+              Quick actions
+              <svg
+                className="qa-car" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
+                strokeLinejoin="round" aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            {/* wired by mountNavMenus() */}
+            <div className="menu right qa-menu" id="qaMenu">
+              <button type="button" data-act="idea">
+                <svg
+                  width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+                  strokeLinejoin="round" aria-hidden="true"
+                >
+                  <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2Z" />
+                </svg>
+                Ideas Day Innovation Competition
+              </button>
+              <button type="button" data-act="feedback" onClick={feedback}>
+                <svg
+                  width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
+                  strokeLinejoin="round" aria-hidden="true"
+                >
+                  <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+                Share your experience
+              </button>
+            </div>
+          </div>
 
           <button
             className="burger"

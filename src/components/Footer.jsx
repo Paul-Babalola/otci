@@ -32,7 +32,7 @@ export default function Footer() {
         <p className="about">Driving reform, creativity and service excellence across Lagos State’s Public Service.</p></div>
        <div className="f-cols">
         <div><h5>About</h5><ul><li><a href="#about">History</a></li><li><a href="#about">Responsibilities</a></li><li><a href="#about">Departments and units</a></li><li><a href="#about">Principal officers</a></li></ul></div>
-        <div className="f-cd"><h5>Departments</h5><ul><li><a href="#ci">Creativity &amp; Innovation</a></li><li><a href="#bos">Branding, One-Stop &amp; Service Charter</a></li><li><a href="#ms">Management Services</a></li><li><a href="#reforms">Reforms</a></li></ul></div>
+        <div className="f-cd"><h5>Departments</h5><ul><li><a href="#ci">Creativity &amp; Innovation</a></li><li><a href="#bos">Branding, One-Stop &amp; Service Charter</a></li><li><a href="#ms">Management Consulting Services</a></li><li><a href="#reforms">Reforms</a></li><li><a href="#non-technical">Non-technical departments</a></li></ul></div>
         <div><h5>Get involved</h5><ul><li><button type="button" data-act="feedback">Share feedback</button></li><li><button type="button" data-act="idea">Submit an idea</button></li><li><a href="#bos/standards">Find a service charter</a></li><li><a href="#ms/contact">Contact us</a></li></ul></div>
         <div><h5>Gallery</h5><ul><li><a href="#gallery">Photo gallery</a></li><li><a href="#gallery/videos">Video gallery</a></li><li><a href="#home/highlights">Event highlights</a></li></ul></div>
        </div>

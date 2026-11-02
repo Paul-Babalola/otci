@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { setNavHandler } from '../otci/engine.js';
 
-export const ROUTES = ['home', 'about', 'bos', 'ci', 'reforms', 'ms', 'gallery'];
+export const ROUTES = ['home', 'about', 'bos', 'ci', 'reforms', 'ms', 'non-technical', 'gallery'];
 
 /**
  * Small hash router, only so the demo app in App.jsx behaves like the original

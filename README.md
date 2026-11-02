@@ -145,6 +145,13 @@ The engine also still carries the bridge-scene code (`bridgeScene`, `carSVG`,
 render it — `startScene()` is what boots the panorama — but it's left in place
 rather than cut, in case you want that hero back.
 
+## Pages
+
+Home, About, the department pages (`#bos`, `#ci`, `#reforms`, `#ms`,
+`#non-technical`) and Gallery. Synced with the artifact on 2026-11-02, which
+added the non-technical departments page, the charter explorer, quarterly
+service performance, the two-step Ideas Day form and the Quick actions menu.
+
 ## OTCI API
 
 `src/api/` is a client for the OTCI backend (all 78 requests in the Postman
