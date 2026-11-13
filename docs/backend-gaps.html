@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OTCI — Backend API Gaps &amp; Requirements · v2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  /* ── Reset & base ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #008751;
+    --green-dark: #006640;
+    --green-light: #e6f4ee;
+    --green-mid: #c2e0ce;
+    --amber: #d97706;
+    --amber-light: #fef3c7;
+    --red: #dc2626;
+    --red-light: #fee2e2;
+    --blue: #1d4ed8;
+    --blue-light: #dbeafe;
+    --text: #1a1a1a;
+    --text-muted: #555;
+    --text-light: #777;
+    --border: #e0e0e0;
+    --bg: #ffffff;
+    --bg-alt: #f8f9fa;
+    --bg-code: #f4f4f4;
+    --radius: 6px;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+  }
+  html { font-size: 15px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: var(--font);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.65;
+    padding-bottom: 80px;
+  }
+
+  /* ── Page shell ──────────────────────────────────────────────── */
+  .page-wrap { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+
+  /* ── Sticky nav (screen only) ──────────────────────────────── */
+  .toc-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--green);
+    color: #fff;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 48px;
+    overflow-x: auto;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  }
+  .toc-nav a {
+    color: rgba(255,255,255,.85);
+    text-decoration: none;
+    font-size: .78rem;
+    font-weight: 500;
+    letter-spacing: .02em;
+    padding: 14px 0;
+    border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+  .toc-nav a:hover { color: #fff; border-bottom-color: rgba(255,255,255,.6); }
+  .toc-nav .brand { font-weight: 700; font-size: .9rem; color: #fff; margin-right: 8px; flex-shrink: 0; }
+
+  /* ── Cover / masthead ──────────────────────────────────────── */
+  .cover {
+    padding: 56px 0 40px;
+    border-bottom: 3px solid var(--green);
+    margin-bottom: 48px;
+  }
+  .cover-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .cover-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 44px;
+    background: var(--green);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    border-radius: 10px;
+    letter-spacing: -.03em;
+    flex-shrink: 0;
+  }
+  .cover-org { font-size: .8rem; color: var(--text-muted); line-height: 1.3; }
+  .cover-org strong { display: block; color: var(--text); font-weight: 600; font-size: .85rem; }
+  .cover h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -.03em;
+  }
+  .cover h1 span { color: var(--green); }
+  .cover-sub { font-size: 1rem; color: var(--text-muted); margin-bottom: 28px; }
+  .cover-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .cover-meta-item { font-size: .82rem; color: var(--text-muted); }
+  .cover-meta-item strong { color: var(--text); font-weight: 600; }
+
+  /* ── TOC (in-page) ──────────────────────────────────────────── */
+  .toc-box {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 52px;
+  }
+  .toc-box h2 { font-size: .9rem; text-transform: uppercase; letter-spacing: .08em; color: var(--green); margin-bottom: 14px; font-weight: 700; }
+  .toc-box ol { padding-left: 20px; }
+  .toc-box li { margin-bottom: 5px; font-size: .88rem; }
+  .toc-box a { color: var(--blue); text-decoration: none; }
+  .toc-box a:hover { text-decoration: underline; }
+
+  /* ── Section headings ──────────────────────────────────────── */
+  .section { margin-bottom: 56px; }
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--green-mid);
+  }
+  .section-num {
+    flex-shrink: 0;
+    width: 36px; height: 36px;
+    background: var(--green);
+    color: #fff;
+    font-size: .85rem;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 2px;
+  }
+  .section-title { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; color: var(--text); line-height: 1.25; }
+  .section-lead { margin-top: 4px; font-size: .88rem; color: var(--text-muted); }
+
+  h3 { font-size: 1.1rem; font-weight: 700; margin: 28px 0 10px; color: var(--text); }
+  h4 { font-size: .95rem; font-weight: 600; margin: 20px 0 8px; color: var(--green-dark); }
+  p { margin-bottom: 12px; font-size: .9rem; }
+
+  /* ── Summary cards ──────────────────────────────────────────── */
+  .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  .card {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .card-num { font-size: 2rem; font-weight: 800; color: var(--green); line-height: 1; margin-bottom: 4px; }
+  .card-label { font-size: .82rem; color: var(--text-muted); font-weight: 500; }
+  .card-detail { font-size: .78rem; color: var(--text-light); margin-top: 6px; }
+
+  /* ── Tables ─────────────────────────────────────────────────── */
+  .tbl-wrap { overflow-x: auto; margin: 16px 0 24px; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+  thead th {
+    background: var(--green);
+    color: #fff;
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    white-space: nowrap;
+  }
+  tbody tr:nth-child(odd) { background: var(--bg-alt); }
+  tbody tr:nth-child(even) { background: var(--bg); }
+  tbody tr:hover { background: var(--green-light); }
+  td { padding: 9px 14px; vertical-align: top; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── Code ──────────────────────────────────────────────────── */
+  pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: .78rem;
+    line-height: 1.6;
+    margin: 10px 0 18px;
+  }
+  code {
+    font-family: var(--mono);
+    font-size: .82em;
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 5px;
+  }
+  pre code { background: none; border: none; padding: 0; font-size: 1em; }
+
+  /* ── Badges / pills ─────────────────────────────────────────── */
+  .badge {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .badge-p1 { background: var(--red-light); color: var(--red); }
+  .badge-p2 { background: var(--amber-light); color: var(--amber); }
+  .badge-p3 { background: var(--green-light); color: var(--green-dark); }
+  .badge-ok { background: var(--green-light); color: var(--green-dark); }
+  .badge-warn { background: var(--amber-light); color: var(--amber); }
+  .badge-miss { background: var(--red-light); color: var(--red); }
+  .badge-new { background: #e0f0ff; color: var(--blue); }
+
+  /* ── Item list (numbered gaps) ──────────────────────────────── */
+  .gap-list { list-style: none; padding: 0; }
+  .gap-list li {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .88rem;
+  }
+  .gap-list li:last-child { border-bottom: none; }
+  .gap-letter {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-weight: 700;
+    font-size: .8rem;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .gap-body strong { font-weight: 600; display: block; margin-bottom: 3px; }
+
+  /* ── Endpoint block ─────────────────────────────────────────── */
+  .ep {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin: 8px 0 10px;
+    font-family: var(--mono);
+    font-size: .8rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .ep .method {
+    font-weight: 700;
+    min-width: 48px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: .72rem;
+    letter-spacing: .05em;
+  }
+  .ep .method.get { background: var(--blue-light); color: var(--blue); }
+  .ep .method.post { background: var(--green-light); color: var(--green-dark); }
+  .ep .method.put { background: var(--amber-light); color: var(--amber); }
+  .ep .method.patch { background: #f3e8ff; color: #7c3aed; }
+  .ep .method.delete { background: var(--red-light); color: var(--red); }
+  .ep .path { color: var(--text); flex: 1; word-break: break-all; }
+  .ep .ep-note { font-size: .75rem; color: var(--text-muted); font-family: var(--font); font-style: italic; }
+
+  /* ── Callout boxes ─────────────────────────────────────────── */
+  .callout {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    margin: 12px 0;
+    font-size: .86rem;
+  }
+  .callout-warn { background: var(--amber-light); border-left: 4px solid var(--amber); }
+  .callout-info { background: var(--blue-light); border-left: 4px solid var(--blue); }
+  .callout-miss { background: var(--red-light); border-left: 4px solid var(--red); }
+  .callout-ok { background: var(--green-light); border-left: 4px solid var(--green); }
+  .callout-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+  /* ── Incon list ─────────────────────────────────────────────── */
+  .incon-list { list-style: none; padding: 0; }
+  .incon-list > li {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: .88rem;
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .incon-list > li:last-child { border-bottom: none; }
+  .incon-num {
+    font-weight: 700;
+    color: var(--green);
+    font-size: .8rem;
+    padding-top: 2px;
+  }
+  .incon-body strong { font-weight: 600; display: block; margin-bottom: 4px; }
+
+  /* ── Priority matrix ──────────────────────────────────────── */
+  .matrix-p1 td:first-child { font-weight: 700; color: var(--red); }
+  .matrix-p2 td:first-child { font-weight: 700; color: var(--amber); }
+  .matrix-p3 td:first-child { font-weight: 700; color: var(--green-dark); }
+
+  /* ── Print ──────────────────────────────────────────────────── */
+  @media print {
+    .toc-nav { display: none !important; }
+    body { font-size: 11pt; padding-bottom: 0; }
+    .page-wrap { max-width: 100%; padding: 0; }
+    .cover { padding: 24px 0 20px; }
+    .section { page-break-before: always; }
+    .cover, .toc-box { page-break-before: avoid; }
+    pre { white-space: pre-wrap; word-break: break-word; }
+    a { color: inherit !important; text-decoration: none !important; }
+    .toc-nav { display: none; }
+    .toc-box { page-break-after: always; }
+    .ep { page-break-inside: avoid; }
+    .callout { page-break-inside: avoid; }
+  }
+  @page { margin: 18mm 20mm; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     STICKY NAV (screen only)
+═══════════════════════════════════════════════════════════════ -->
+<nav class="toc-nav" aria-label="Document navigation">
+  <span class="brand">OTCI API Gaps</span>
+  <a href="#s1">1. Summary</a>
+  <a href="#s2">2. What's Wired</a>
+  <a href="#s3">3. Public Site</a>
+  <a href="#s4">4. CMS Gaps</a>
+  <a href="#s5">5. Spec Issues</a>
+  <a href="#s6">6. Priority</a>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- ════════════════════════════════════════════════════════════
+       COVER
+  ═════════════════════════════════════════════════════════════ -->
+  <header class="cover">
+    <div class="cover-eyebrow">
+      <div class="cover-mark">OT</div>
+      <div class="cover-org">
+        <strong>Lagos State Office of Transformation, Creativity &amp; Innovation</strong>
+        Platform Engineering · Internal Technical Document
+      </div>
+    </div>
+    <h1>Backend API <span>Gaps &amp; Requirements</span></h1>
+    <p class="cover-sub">
+      Updated audit of missing, mismatched, and undocumented API endpoints required to fully connect the OTCI public website and the OTCI Studio CMS to the backend. Reflects all integration work completed as of November 2026.
+    </p>
+    <div class="cover-meta">
+      <div class="cover-meta-item"><strong>Date</strong> November 10, 2026</div>
+      <div class="cover-meta-item"><strong>Version</strong> 2.1</div>
+      <div class="cover-meta-item"><strong>Audience</strong> Backend / API Developer</div>
+      <div class="cover-meta-item"><strong>Source</strong> Postman collection (116 requests) + frontend audit</div>
+      <div class="cover-meta-item"><strong>Status</strong> <span class="badge badge-warn">Action Required</span></div>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════════════════════════════
+       TABLE OF CONTENTS
+  ═════════════════════════════════════════════════════════════ -->
+  <nav class="toc-box" aria-label="Table of contents">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#s1">Executive Summary</a></li>
+      <li><a href="#s2">What Is Now Integrated</a></li>
+      <li><a href="#s3">OTCI Public Site — Missing &amp; Mismatched Endpoints</a>
+        <ol style="margin-top:4px;padding-left:16px;">
+          <li style="margin-bottom:3px;"><a href="#s3a">Newsletter subscription</a></li>
+          <li style="margin-bottom:3px;"><a href="#s3b">Citizen / MDA feedback</a></li>
+          <li style="margin-bottom:3px;"><a href="#s3c">Contact / MCS form</a></li>
+          <li style="margin-bottom:3px;"><a href="#s3d">Public content APIs</a></li>
+          <li style="margin-bottom:3px;"><a href="#s3e">Registration &amp; submission mismatches (E–K)</a></li>
+        </ol>
+      </li>
+      <li><a href="#s4">OTCI CMS — Remaining Gaps</a>
+        <ol style="margin-top:4px;padding-left:16px;">
+          <li style="margin-bottom:3px;"><a href="#s4-1">Login UI mismatch</a></li>
+          <li style="margin-bottom:3px;"><a href="#s4-2">Overview dashboard stats</a></li>
+          <li style="margin-bottom:3px;"><a href="#s4-3">Pages list — load from API</a></li>
+          <li style="margin-bottom:3px;"><a href="#s4-4">Service charters</a></li>
+          <li style="margin-bottom:3px;"><a href="#s4-5">Activity log</a></li>
+          <li style="margin-bottom:3px;"><a href="#s4-6">Editor — load content from API</a></li>
+          <li style="margin-bottom:3px;"><a href="#s4-7">Department admins — role mismatch</a></li>
+          <li style="margin-bottom:3px;"><a href="#s4-8">Missing admin views — feedback, contact, newsletter</a></li>
+        </ol>
+      </li>
+      <li><a href="#s5">API Spec Inconsistencies</a></li>
+      <li><a href="#s6">Priority Matrix</a></li>
+    </ol>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════════
+       SECTION 1 — EXECUTIVE SUMMARY
+  ═════════════════════════════════════════════════════════════ -->
+  <section class="section" id="s1">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div>
+        <div class="section-title">Executive Summary</div>
+        <div class="section-lead">Updated picture of integration status after the latest round of frontend wiring.</div>
+      </div>
+    </div>
+
+    <p>The Postman collection (116 requests) covers the <strong>idea submission core flow</strong> and the <strong>admin submission review workflow</strong> comprehensively, plus a full CMS API. Following the latest integration sprint, the CMS now calls real endpoints for login, gallery CRUD, page publish, and section edits. What remains unintegrated is itemised below.</p>
+
+    <div class="card-row">
+      <div class="card">
+        <div class="card-num">3</div>
+        <div class="card-label">Missing endpoint groups (public site)</div>
+        <div class="card-detail">Newsletter, feedback, contact — plus 7 public content endpoints</div>
+      </div>
+      <div class="card">
+        <div class="card-num">7</div>
+        <div class="card-label">Registration / spec mismatches (public site)</div>
+        <div class="card-detail">LASRRA type, oracle number, response shapes, auth flow</div>
+      </div>
+      <div class="card">
+        <div class="card-num">7 / 26</div>
+        <div class="card-label">CMS screens with no or partial backend support</div>
+        <div class="card-detail">Down from 23/26 — login, gallery, publish, section save, dashboard, activity, charters list now wired</div>
+      </div>
+      <div class="card">
+        <div class="card-num">9</div>
+        <div class="card-label">Postman spec inconsistencies</div>
+        <div class="card-detail">Pagination key, duplicate fields, missing response bodies, URL prefix</div>
+      </div>
+    </div>
+
+    <h3>Coverage summary by screen</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>App</th><th>Screen / Feature</th><th>API Status</th><th>Priority</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Public site</td><td>Register (citizen &amp; civil servant)</td><td><span class="badge badge-ok">✅ Wired</span></td><td><span class="badge badge-warn">⚠ Confirm response shape</span></td></tr>
+          <tr><td>Public site</td><td>Login / logout / profile</td><td><span class="badge badge-ok">✅ Wired</span></td><td>—</td></tr>
+          <tr><td>Public site</td><td>Get active form + submit idea</td><td><span class="badge badge-ok">✅ Wired</span></td><td><span class="badge badge-warn">⚠ Confirm upload response key</span></td></tr>
+          <tr><td>Public site</td><td>Reference data (LGAs, MDAs, sectors)</td><td><span class="badge badge-ok">✅ Wired</span></td><td>—</td></tr>
+          <tr><td>Public site</td><td>Newsletter subscription</td><td><span class="badge badge-miss">❌ Missing</span></td><td><span class="badge badge-p2">P2</span></td></tr>
+          <tr><td>Public site</td><td>Citizen / MDA feedback</td><td><span class="badge badge-miss">❌ Missing</span></td><td><span class="badge badge-p2">P2</span></td></tr>
+          <tr><td>Public site</td><td>Contact / MCS form</td><td><span class="badge badge-miss">❌ Missing</span></td><td><span class="badge badge-p3">P3</span></td></tr>
+          <tr><td>Public site</td><td>News, gallery, impact stats</td><td><span class="badge badge-miss">❌ Missing</span></td><td><span class="badge badge-p3">P3</span></td></tr>
+          <tr><td>Public site</td><td>Ideas Day public details</td><td><span class="badge badge-miss">❌ Missing</span></td><td><span class="badge badge-p3">P3</span></td></tr>
+          <tr><td>CMS</td><td>Login</td><td><span class="badge badge-warn">⚠ Wired (UI mismatch)</span></td><td><span class="badge badge-p1">P1</span></td></tr>
+          <tr><td>CMS</td><td>Sidebar: profile + logout</td><td><span class="badge badge-ok">✅ Wired</span></td><td>—</td></tr>
+          <tr><td>CMS</td><td>Overview / dashboard stats</td><td><span class="badge badge-new">✅ Newly wired</span></td><td>—</td></tr>
+          <tr><td>CMS</td><td>Pages list</td><td><span class="badge badge-warn">⚠ Local store only</span></td><td><span class="badge badge-p2">P2</span></td></tr>
+          <tr><td>CMS</td><td>Editor — section auto-save</td><td><span class="badge badge-new">✅ Newly wired</span></td><td>—</td></tr>
+          <tr><td>CMS</td><td>Editor — section visibility toggle</td><td><span class="badge badge-new">✅ Newly wired</span></td><td>—</td></tr>
+          <tr><td>CMS</td><td>Editor — publish page</td><td><span class="badge badge-new">✅ Newly wired</span></td><td>—</td></tr>
+          <tr><td>CMS</td><td>Editor — load content from API</td><td><span class="badge badge-miss">❌ Uses seed data</span></td><td><span class="badge badge-p1">P1</span></td></tr>
+          <tr><td>CMS</td><td>Service charters — list</td><td><span class="badge badge-new">✅ Newly wired</span></td><td>—</td></tr>
+          <tr><td>CMS</td><td>Service charters — create/edit/delete/publish/PDF</td><td><span class="badge badge-miss">❌ Local store only</span></td><td><span class="badge badge-p1">P1</span></td></tr>
+          <tr><td>CMS</td><td>Media library — gallery CRUD</td><td><span class="badge badge-new">✅ Newly wired</span></td><td>—</td></tr>
+          <tr><td>CMS</td><td>Activity log</td><td><span class="badge badge-new">✅ Newly wired</span></td><td>—</td></tr>
+          <tr><td>CMS</td><td>Feedback submissions list/detail</td><td><span class="badge badge-miss">❌ View not built</span></td><td><span class="badge badge-p2">P2</span></td></tr>
+          <tr><td>CMS</td><td>Contact MCSD requests list/detail</td><td><span class="badge badge-miss">❌ View not built</span></td><td><span class="badge badge-p2">P2</span></td></tr>
+          <tr><td>CMS</td><td>Newsletter subscribers list</td><td><span class="badge badge-miss">❌ View not built</span></td><td><span class="badge badge-p3">P3</span></td></tr>
+          <tr><td>CMS</td><td>Department admins list</td><td><span class="badge badge-ok">✅ Wired</span></td><td>—</td></tr>
+          <tr><td>CMS</td><td>Invite admin</td><td><span class="badge badge-warn">⚠ Partial</span></td><td><span class="badge badge-p2">P2 — role + dept mismatch</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       SECTION 2 — WHAT IS NOW INTEGRATED
+  ═════════════════════════════════════════════════════════════ -->
+  <section class="section" id="s2">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div>
+        <div class="section-title">What Is Now Integrated</div>
+        <div class="section-lead">Frontend work completed in the latest sprint — these screens now call real API endpoints.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-ok">
+      <span class="callout-icon">✅</span>
+      <div>All items below are wired. The CMS still falls back to localStorage when the API is unreachable, so the UI remains usable during development without a backend.</div>
+    </div>
+
+    <h3>CMS: Idea form submission (public site)</h3>
+    <p><code>IdeaFormModal.jsx</code> — registers citizen / civil servant, fetches the active form, maps fields by <code>template_key</code>, and submits answers with file upload support.</p>
+
+    <h3>CMS: Login</h3>
+    <p><code>Login.jsx</code> — The two-step UI (email → 6-digit code boxes) is unchanged. In the code-verify step, the joined digits are posted as the password to <code>POST /api/auth/login</code>. On success the token is stored as <code>otci.cms_token</code> in localStorage.</p>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/auth/login</span><span class="ep-note">Body: <code>{ email, password }</code> — token stored as <code>otci.cms_token</code></span></div>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div><strong>UI mismatch remains:</strong> The login screen labels the second field "6-digit code" and says "We sent a code to your email." In reality users must type their password into those six boxes. Update the UI copy or add an OTP send/verify endpoint (see §4.1).</div>
+    </div>
+
+    <h3>CMS: Gallery / Media library</h3>
+    <p><code>Media.jsx</code> — The gallery list loads from the API on mount and falls back to seed data on error. All mutations are now wired:</p>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/gallery</span><span class="ep-note">Load folder list on mount</span></div>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/admin/gallery</span><span class="ep-note">Create new folder</span></div>
+    <div class="ep"><span class="method put">PUT</span><span class="path">/api/admin/gallery/:id</span><span class="ep-note">Debounced title / description update (800 ms)</span></div>
+    <div class="ep"><span class="method patch">PATCH</span><span class="path">/api/admin/gallery/:id/visibility</span><span class="ep-note">Toggle folder visibility</span></div>
+    <div class="ep"><span class="method delete">DELETE</span><span class="path">/api/admin/gallery/:id</span><span class="ep-note">Delete folder</span></div>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/admin/gallery/:id/images</span><span class="ep-note">Multipart image upload; falls back to base64 on error</span></div>
+    <div class="ep"><span class="method delete">DELETE</span><span class="path">/api/admin/gallery/:id/images/:imageId</span><span class="ep-note">Remove individual image</span></div>
+
+    <h3>CMS: Editor — publish, section save, section toggle</h3>
+    <p><code>Editor.jsx</code> — Three previously mocked actions now call real endpoints:</p>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/admin/pages/:slug/publish</span><span class="ep-note">Publish page — local state updated after API call</span></div>
+    <div class="ep"><span class="method patch">PATCH</span><span class="path">/api/admin/pages/:slug/sections/:uid</span><span class="ep-note">Toggle section visibility (<code>{ visible: bool }</code>)</span></div>
+    <div class="ep"><span class="method put">PUT</span><span class="path">/api/admin/pages/:slug/sections/:uid</span><span class="ep-note">Auto-save section content — debounced 1500 ms</span></div>
+
+    <h3>CMS: Admins (wired in a prior sprint)</h3>
+    <p><code>Admins.jsx</code> — Full CRUD: list admins, invite (single + batch), deactivate, reactivate, resend invite, revoke invite. <code>App.jsx</code> logout calls <code>POST /api/v1/admin/logout</code>.</p>
+
+    <h3>CMS: Overview dashboard</h3>
+    <p><code>Overview.jsx</code> — Calls the dashboard endpoint on mount. API-sourced counts for sections, media, and pages replace local store computations; falls back gracefully when unreachable. Recent activity in the timeline is sourced from <code>recent_activity[]</code> in the response.</p>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/dashboard</span><span class="ep-note">Mounted once; response extracted from <code>body.dashboard</code></span></div>
+    <p>The frontend maps the following fields from <code>body.dashboard</code>:</p>
+    <pre><code>{
+  "dashboard": {
+    "sections":        { "total": 48, "live": 41, "hidden": 7 },
+    "media":           { "images": 134, "folders": 8, "visible_folders": 6, "empty_folders": 1 },
+    "pages":           { "published": 7, "changes": 2, "in_review": 1 },
+    "recent_activity": [
+      {
+        "actor":        "Babatunde Fashola",
+        "action":       "page_published",
+        "action_label": "Published page",
+        "subject":      "About",
+        "page":         "about",
+        "created_at":   "2026-11-08T14:22:00Z"
+      }
+    ]
+  }
+}</code></pre>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div><strong>Response key is <code>body.dashboard</code>, not <code>body.data</code>.</strong> The standard <code>cmsApi.call()</code> helper returns <code>body.data ?? body</code> and would silently miss the <code>dashboard</code> key. The endpoint is therefore called with <code>cmsApiFetch</code> directly and the key is extracted manually.</div>
+    </div>
+
+    <h3>CMS: Activity log</h3>
+    <p><code>Activity.jsx</code> — Fetches the last 100 activity entries on mount and replaces <code>S.activity</code> with live data. Falls back to the existing local store (seeded demo entries) if the request fails.</p>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/activity</span><span class="ep-note">Query: <code>?per_page=100</code> — response key is <code>body.activity[]</code></span></div>
+    <p>Each activity item is mapped to the Timeline shape. The fields the frontend reads are:</p>
+    <pre><code>{
+  "activity": [
+    {
+      "actor":        "Babatunde Fashola",
+      "action":       "page_published",
+      "action_label": "Published page",
+      "subject":      "About",
+      "page":         "about",
+      "created_at":   "2026-11-08T14:22:00Z"
+    }
+  ],
+  "meta": { "current_page": 1, "per_page": 100, "total": 342, "last_page": 4 }
+}</code></pre>
+    <p><code>action</code> values that do not map directly to Timeline verb keys are translated via a <code>VERB_MAP</code>: <code>sent_for_review → "sent for review"</code>, <code>withdrew_review → "discarded"</code>, <code>reordered → "edited"</code>, <code>uploaded → "uploaded to"</code>, <code>removed → "deleted"</code>. Unmapped values fall back to <code>action_label</code> then <code>action</code>.</p>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div><strong>Response key is <code>body.activity</code>, not <code>body.data</code>.</strong> Same extraction issue as the dashboard; called with <code>cmsApiFetch</code> directly.</div>
+    </div>
+
+    <h3>CMS: Charters list</h3>
+    <p><code>Charters.jsx</code> — Loads charters from the API on mount. Charters that have been edited locally (flagged <code>_dirty</code> or <code>_fresh</code>) are preserved and not overwritten by the API response. The API counts for services, fee tables, and issues replace the previously computed empty-array lengths.</p>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/charters</span><span class="ep-note">Response key is <code>body.charters[]</code></span></div>
+    <p>Fields the frontend reads from each charter item:</p>
+    <pre><code>{
+  "charters": [
+    {
+      "key":             "mof-001",
+      "id":              12,
+      "name":            "Ministry of Finance Charter",
+      "short":           "MoF",
+      "sector":          "Finance",
+      "icon":            "gov",
+      "state":           "published",
+      "issues_count":    0,
+      "services_count":  8,
+      "fee_tables_count": 3
+    }
+  ],
+  "meta": { "current_page": 1, "per_page": 50, "total": 17, "last_page": 1 }
+}</code></pre>
+    <p><code>state</code> maps to the local status: <code>"published"</code> → <code>status: 'published'</code>; <code>"changes"</code> → <code>status: 'published' + _dirty: true</code>; <code>"coming"</code> → <code>status: 'coming'</code>; anything else → <code>'draft'</code>.</p>
+    <p><strong>Charter CRUD (create, update, delete, publish, PDF upload) remains local-only.</strong> See §4.4 for the remaining work.</p>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       SECTION 3 — PUBLIC SITE
+  ═════════════════════════════════════════════════════════════ -->
+  <section class="section" id="s3">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div>
+        <div class="section-title">OTCI Public Site — Missing &amp; Mismatched Endpoints</div>
+        <div class="section-lead">The public website at <code>otci.lagosstate.gov.ng</code>. Idea submission is wired; four categories below remain static.</div>
+      </div>
+    </div>
+
+    <!-- 3A -->
+    <h3 id="s3a">A. Newsletter subscription</h3>
+    <p>The site footer contains a newsletter sign-up form (<code>#ftNews</code>) that collects an email address and shows a success message. Currently the form validates client-side and shows success without calling any backend. No endpoint exists.</p>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/v1/public/newsletter/subscribe</span></div>
+    <p><strong>Request body (JSON):</strong></p>
+    <pre><code>{
+  "email": "ada@example.com"
+}</code></pre>
+    <p><strong>Expected response:</strong></p>
+    <pre><code>{
+  "success": true,
+  "message": "You're subscribed. The next briefing will land in your inbox."
+}</code></pre>
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div>Always return <code>200 OK</code> regardless of whether the email already exists, to prevent enumeration. If using a third-party email platform (Mailchimp, Brevo, etc.), this endpoint can be a thin proxy.</div>
+    </div>
+
+    <!-- 3B -->
+    <h3 id="s3b">B. Citizen / MDA feedback submission</h3>
+    <p>A floating "Share feedback" button (<code>FeedbackFab</code>) and a "Share feedback" link in the footer both trigger a feedback modal. The modal collects feedback but has no backend endpoint to send it to.</p>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/v1/public/feedback</span></div>
+    <p><strong>Request body (JSON):</strong></p>
+    <pre><code>{
+  "email": "ada@example.com",    // optional — not required for anonymous feedback
+  "message": "The permit process took 6 weeks...",
+  "type": "mda"                  // "general" | "mda" (optional, defaults to "general")
+}</code></pre>
+    <p><strong>Expected response:</strong></p>
+    <pre><code>{
+  "success": true,
+  "message": "Thank you for your feedback.",
+  "data": {
+    "reference_code": "FBK-2026-0042"
+  }
+}</code></pre>
+
+    <!-- 3C -->
+    <h3 id="s3c">C. Contact / Management Consulting Services form</h3>
+    <p>The Management Consulting Services department page and the footer link to <code>#ms/contact</code>, which opens a contact request form. No backend endpoint exists.</p>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/v1/public/contact</span></div>
+    <p><strong>Request body (JSON):</strong></p>
+    <pre><code>{
+  "name": "Ada Okafor",
+  "email": "ada@example.com",
+  "phone": "08012345678",
+  "organisation": "Lagos State Ministry of Finance",   // optional
+  "subject": "Process mapping engagement",
+  "message": "We would like to request a process mapping..."
+}</code></pre>
+    <p><strong>Expected response:</strong></p>
+    <pre><code>{
+  "success": true,
+  "message": "Your request has been received. We will contact you within 2 working days.",
+  "data": {
+    "reference_code": "MCS-2026-0007"
+  }
+}</code></pre>
+
+    <!-- 3D -->
+    <h3 id="s3d">D. Public content APIs (all currently hardcoded)</h3>
+    <p>The following sections of the public website display content that is currently hardcoded as static strings in the frontend source. For CMS-driven content to appear on the live site, these read-only public endpoints are required. <strong>These are blocked on the CMS Pages and Media APIs being complete first.</strong></p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Endpoint</th><th>Content it drives</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>GET /api/v1/public/pages/{page_code}</code></td>
+            <td>All department pages (Landing, About, C&amp;I, BOS, Reforms, MCS…)</td>
+            <td>Sections in <code>sort_order</code>; excludes hidden sections</td>
+          </tr>
+          <tr>
+            <td><code>GET /api/v1/public/news</code></td>
+            <td>News &amp; updates section on Landing page</td>
+            <td>Paginated; <code>?page=&amp;per_page=</code></td>
+          </tr>
+          <tr>
+            <td><code>GET /api/v1/public/news/{slug}</code></td>
+            <td>Single news article detail</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><code>GET /api/v1/public/gallery/albums</code></td>
+            <td>Gallery page — photo albums list</td>
+            <td>Only returns <code>is_visible: true</code> folders</td>
+          </tr>
+          <tr>
+            <td><code>GET /api/v1/public/gallery/albums/{slug}</code></td>
+            <td>Gallery page — album with its images</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><code>GET /api/v1/public/gallery/videos</code></td>
+            <td>Gallery page — video gallery</td>
+            <td>YouTube embed URL or hosted video URL</td>
+          </tr>
+          <tr>
+            <td><code>GET /api/v1/public/impact</code></td>
+            <td>Impact statistics section (Landing page counter tiles)</td>
+            <td>Array of <code>{ label, value, unit }</code></td>
+          </tr>
+          <tr>
+            <td><code>GET /api/v1/public/events/current/idea-day</code></td>
+            <td>Ideas Day banner — date, time, venue</td>
+            <td>Reads from the active event's <code>idea_day_*</code> fields (already set by admin)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 3E-K: Mismatches -->
+    <h3 id="s3e">E–K. Registration &amp; submission spec mismatches</h3>
+    <p>The following items are gaps between the existing API spec and the registration/submission flow as implemented in the frontend. Each requires a decision or confirmation from the backend team.</p>
+
+    <ul class="gap-list">
+      <li>
+        <div class="gap-letter">E</div>
+        <div class="gap-body">
+          <strong>LASRRA ID type missing from <code>means_of_id_type</code> enum</strong>
+          The registration form asks users to upload their <strong>LASRRA ID</strong>. The API's <code>means_of_id_type</code> enum is <code>national_id | passport | drivers_license | voters_card</code>. LASRRA is not listed. The frontend currently sends <code>national_id</code> as a fallback.
+          <br /><br />
+          <strong>Action needed:</strong> Either add <code>lasrra</code> to the enum, or confirm that <code>national_id</code> is the correct mapping for LASRRA cards.
+        </div>
+      </li>
+      <li>
+        <div class="gap-letter">F</div>
+        <div class="gap-body">
+          <strong>Oracle payroll number not in civil servant registration</strong>
+          The civil servant payload has <code>account_officer_email</code>, <code>account_officer_role</code>, <code>designation</code>, and <code>grade_level</code>, but no payroll/oracle number.
+          <br /><br />
+          <strong>Action needed:</strong> Confirm whether Oracle number is required. If yes, add <code>oracle_number?: string</code> to the civil servant registration endpoint.
+        </div>
+      </li>
+      <li>
+        <div class="gap-letter">G</div>
+        <div class="gap-body">
+          <strong><code>date_of_birth</code> required but absent from spec examples</strong>
+          <strong>Action needed:</strong> Confirm the accepted format is <code>YYYY-MM-DD</code>. Add a saved example to the Postman collection.
+        </div>
+      </li>
+      <li>
+        <div class="gap-letter">H</div>
+        <div class="gap-body">
+          <strong><code>account_officer_role</code> vs. the civil servant's own designation</strong>
+          <strong>Action needed:</strong> Clarify whether <code>account_officer_role</code> is the supervisor's job title or the registrant's own designation.
+        </div>
+      </li>
+      <li>
+        <div class="gap-letter">I</div>
+        <div class="gap-body">
+          <strong>Idea form is now authentication-required — confirm no anonymous path needed</strong>
+          The API requires the user to be registered and authenticated before submitting. The frontend implements a combined register-then-submit flow.
+          <br /><br />
+          <strong>Action needed:</strong> Confirm with the product team that there is <em>no anonymous submission path</em> required.
+        </div>
+      </li>
+      <li>
+        <div class="gap-letter">J</div>
+        <div class="gap-body">
+          <strong>Media upload response shape not documented</strong>
+          <code>POST /api/v1/public/media/upload</code> response body is not documented. The frontend tries three keys in order: <code>data.path</code>, <code>data.file_path</code>, <code>data.relative_path</code>.
+          <br /><br />
+          <strong>Action needed:</strong> Document the response shape and confirm the exact key name for the file path.
+          <pre style="margin-top:8px;"><code>{
+  "success": true,
+  "data": {
+    "path": "submission_files/ZrZEWkGzk5wfpiXtXhZLfZkW0B1uW7cHSoUFGZss.pdf",
+    "url": "https://…/storage/submission_files/…",
+    "size": 204800,
+    "mime_type": "application/pdf"
+  }
+}</code></pre>
+        </div>
+      </li>
+      <li>
+        <div class="gap-letter">K</div>
+        <div class="gap-body">
+          <strong>Registration success response shape not documented</strong>
+          Neither registration endpoint has a documented response shape. The frontend assumes <code>{ token: string, form?: IdeaForm }</code> inside the <code>data</code> envelope.
+          <br /><br />
+          <strong>Action needed:</strong> Add saved response examples to the Postman collection.
+          <pre style="margin-top:8px;"><code>{
+  "success": true,
+  "message": "Registration successful. Welcome to OTCI!",
+  "data": {
+    "token": "14|sometoken…",
+    "user": { "id": 42, "first_name": "Ada", "last_name": "Okafor", "email": "ada@example.com", "user_type": "citizen" },
+    "form": { "code": "EVT-2026-001", "title": "OTCI Innovation Challenge 2026", "fields": [ … ] }
+  }
+}</code></pre>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       SECTION 4 — CMS REMAINING GAPS
+  ═════════════════════════════════════════════════════════════ -->
+  <section class="section" id="s4">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div>
+        <div class="section-title">OTCI CMS — Remaining Gaps</div>
+        <div class="section-lead">Items still unintegrated after the latest sprint. Login, gallery CRUD, publish, section save, and admins are all wired — these are what remain.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div><strong>Current state:</strong> The CMS persists all page content to <code>localStorage</code> (store key <code>otci-studio-v4</code>) as a temporary measure. Gallery, admins, and login now use real API calls, but page content, charters, and activity log do not. Content is lost when browser storage is cleared.</div>
+    </div>
+
+    <!-- 4.1 -->
+    <h3 id="s4-1">4.1 Login — OTP / password UI mismatch</h3>
+    <p>The CMS login screen displays a two-step <strong>OTP</strong> flow (email → 6 boxes labelled "digit 1–6") and shows the message <em>"We sent a 6-digit code to your email."</em> The backend only has <code>POST /api/auth/login</code> (email + password). The frontend now posts the joined digits as the password, which works but is confusing for users.</p>
+
+    <p><strong>Option A (recommended):</strong> Implement OTP send/verify endpoints. This matches the existing UI exactly with no visual change needed.</p>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/auth/send-code</span><span class="ep-note">Step 1 — sends 6-digit OTP to email</span></div>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/auth/verify-code</span><span class="ep-note">Step 2 — verify code, return token</span></div>
+
+    <p><strong>Option B:</strong> Update the UI copy so the second step is labelled "Enter your password" instead of "Enter the code". This requires a small JSX change but no new backend work.</p>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div>After a successful login, the CMS continues to use <code>GET /api/auth/me</code> and <code>POST /api/auth/logout</code>.</div>
+    </div>
+
+    <!-- 4.2 -->
+    <h3 id="s4-2">4.2 Overview dashboard stats <span class="badge badge-ok" style="font-size:.7rem;vertical-align:middle;">✅ Resolved — v2.1</span></h3>
+    <div class="callout callout-ok">
+      <span class="callout-icon">✅</span>
+      <div>Wired in this sprint. <code>Overview.jsx</code> now calls <code>GET /api/admin/dashboard</code> on mount and reads KPI counts from <code>body.dashboard</code>. See §2 for the exact response shape the frontend expects.</div>
+    </div>
+
+    <!-- 4.3 -->
+    <h3 id="s4-3">4.3 Pages list — load from API on mount</h3>
+    <p>The Pages view lists all sections across all department pages. It reads entirely from the local store seeded at startup; it does not call <code>GET /api/admin/pages</code> to hydrate real content. Without this, edits made by other admins do not appear until the localStorage seed is manually cleared.</p>
+
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/pages</span><span class="ep-note">List pages with status — hydrate <code>S.pages</code> on mount</span></div>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/pages/:slug</span><span class="ep-note">Full page with sections — load when editor opens</span></div>
+
+    <p>The store's <code>S.pages</code> shape uses <code>pid</code> keys (<code>home</code>, <code>about</code>, <code>ci</code>, etc.) and each page has <code>sections[].v</code> for draft content and <code>sections[].pub</code> for published content. The API response must be mapped into this shape on load.</p>
+
+    <!-- 4.4 -->
+    <h3 id="s4-4">4.4 Service Charters</h3>
+    <p>The Service Charters list now loads from the API on mount (wired this sprint — see §2). The charter editor (<code>Charter.jsx</code>) still creates, updates, deletes, publishes, and uploads PDFs against the local store only. No CRUD endpoints exist on the backend yet.</p>
+    <div class="callout callout-ok">
+      <span class="callout-icon">✅</span>
+      <div><strong>List wired:</strong> <code>GET /api/admin/charters</code> — loads on mount, extracts from <code>body.charters[]</code>. See §2 for field mapping.</div>
+    </div>
+
+    <h4>Remaining endpoints still needed</h4>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/charters</span><span class="ep-note">✅ Wired — paginated list (key, name, state, issues_count, services_count, fee_tables_count)</span></div>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/admin/charters</span><span class="ep-note">Create a new charter</span></div>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/charters/:charter_code</span><span class="ep-note">Full charter object with services + standards</span></div>
+    <div class="ep"><span class="method put">PUT</span><span class="path">/api/admin/charters/:charter_code</span><span class="ep-note">Update charter fields (body, services, standards)</span></div>
+    <div class="ep"><span class="method delete">DELETE</span><span class="path">/api/admin/charters/:charter_code</span><span class="ep-note">Delete; return 409 if published</span></div>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/admin/charters/:charter_code/publish</span><span class="ep-note">Set status = published</span></div>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/admin/charters/:charter_code/unpublish</span><span class="ep-note">Set status = draft</span></div>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/admin/charters/:charter_code/coming-soon</span><span class="ep-note">Set status = coming_soon</span></div>
+    <div class="ep"><span class="method post">POST</span><span class="path">/api/admin/charters/:charter_code/upload-signed-pdf</span><span class="ep-note">Upload signed charter PDF; returns URL</span></div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div>
+        <strong>MDA names:</strong> <code>GET /api/v1/admin/mdas</code> already exists and can populate the MDA dropdown in the charter form.
+        <br /><br />
+        <strong>Public read endpoints also needed:</strong>
+        <code>GET /api/v1/public/charters</code> (list published charters) and
+        <code>GET /api/v1/public/charters/{code}</code> (single charter for display on the BOS department page).
+      </div>
+    </div>
+
+    <!-- 4.5 -->
+    <h3 id="s4-5">4.5 Activity log <span class="badge badge-ok" style="font-size:.7rem;vertical-align:middle;">✅ Resolved — v2.1</span></h3>
+    <div class="callout callout-ok">
+      <span class="callout-icon">✅</span>
+      <div>Wired in this sprint. <code>Activity.jsx</code> now calls <code>GET /api/admin/activity</code> on mount and merges items into <code>S.activity</code>. See §2 for the exact response shape and field names the frontend reads. Note that the backend field names are <code>actor</code>, <code>action</code>, <code>action_label</code>, <code>subject</code>, <code>page</code> — not the <code>actor_name</code>/<code>action_type</code> names documented in v2.0.</div>
+    </div>
+
+    <!-- 4.6 -->
+    <h3 id="s4-6">4.6 Editor — load page content from API</h3>
+    <p>The Editor opens a page from the local store seed. It never calls <code>GET /api/admin/pages/:slug</code> to fetch the latest published or draft content. This means two admins editing the same page will overwrite each other.</p>
+
+    <p>When the editor mounts it should:</p>
+    <ol style="padding-left:20px;font-size:.9rem;margin-bottom:12px;">
+      <li>Call <code>GET /api/admin/pages/:slug</code> to get the page and its sections.</li>
+      <li>Map the response into the store shape, hydrating <code>s.v</code> (draft) and <code>s.pub</code> (published content).</li>
+      <li>Update <code>S.pages[pid]</code> and re-render via <code>commit()</code>.</li>
+    </ol>
+
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/pages/:slug</span><span class="ep-note">Load on Editor mount to hydrate S.pages[pid]</span></div>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/pages/:slug/sections</span><span class="ep-note">Sections list with draft + published content</span></div>
+
+    <!-- 4.7 -->
+    <h3 id="s4-7">4.7 Department admins — role &amp; department mismatch</h3>
+    <p>The Department Admins screen lists all admins and allows inviting new ones. The list endpoint exists; the invite has two mismatches:</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>CMS expects</th><th>API has</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>List admins</td>
+            <td><code>GET /admin/admins?view=unified</code></td>
+            <td>✅ Exists</td>
+            <td>No change needed</td>
+          </tr>
+          <tr>
+            <td>Role values</td>
+            <td><code>editor</code>, <code>super</code></td>
+            <td><code>admin</code>, <code>super_admin</code></td>
+            <td>Confirm mapping: <code>editor → admin</code>, <code>super → super_admin</code>. Update Postman.</td>
+          </tr>
+          <tr>
+            <td>Department field</td>
+            <td>Invite includes <code>department</code> (e.g. "BOS", "C&amp;I")</td>
+            <td>No <code>department</code> field on <code>POST /admin/invitations</code></td>
+            <td>Add optional <code>department?: string</code> to invitation payload.</td>
+          </tr>
+          <tr>
+            <td>Remove admin</td>
+            <td>"Remove" action in the UI</td>
+            <td><code>PUT /admin/admins/{code}/deactivate</code></td>
+            <td>Confirm deactivate is the intended behaviour (not hard-delete). The UI label can be updated to "Deactivate".</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4.8 -->
+    <h3 id="s4-8">4.8 Missing CMS admin views — Feedback, Contact, Newsletter</h3>
+    <p>The API layer (<code>lib/api/index.js</code>) already has fully-typed methods for three admin read flows, but no corresponding CMS views exist. The backend endpoints are assumed to follow the same <code>{ &lt;resource&gt;, meta }</code> response format as other list endpoints.</p>
+
+    <h4>Feedback submissions</h4>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/feedback</span><span class="ep-note">Paginated list — response key expected: <code>body.data[]</code> (via standard <code>list()</code>)</span></div>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/feedback/:id</span><span class="ep-note">Single feedback submission detail</span></div>
+    <p>The view should show: type (general / MDA), email (if provided), message, reference code, submitted date. Add a "mark read / archive" action if the backend supports status transitions.</p>
+
+    <h4>Contact MCSD requests</h4>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/contact-requests</span><span class="ep-note">Paginated list</span></div>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/contact-requests/:id</span><span class="ep-note">Single request detail</span></div>
+    <p>The view should show: name, email, phone, organisation, subject, message, reference code, submitted date.</p>
+
+    <h4>Newsletter subscribers</h4>
+    <div class="ep"><span class="method get">GET</span><span class="path">/api/admin/newsletter/subscribers</span><span class="ep-note">Paginated list of subscribers</span></div>
+    <p>The view should show: email, subscribed date, status (active / unsubscribed). An export-to-CSV action would be useful.</p>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div>All three sets of API methods are already defined in <code>adminFeedback</code>, <code>adminContact</code>, and <code>adminNewsletter</code> in <code>lib/api/index.js</code>. No API changes are required — only new React views need to be built and wired into the sidebar navigation.</div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       SECTION 5 — SPEC INCONSISTENCIES
+  ═════════════════════════════════════════════════════════════ -->
+  <section class="section" id="s5">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <div>
+        <div class="section-title">API Spec Inconsistencies</div>
+        <div class="section-lead">Contradictions and gaps found within the Postman collection itself, independent of the missing endpoints above. Each item has a concrete action needed.</div>
+      </div>
+    </div>
+
+    <ol class="incon-list">
+      <li>
+        <div class="incon-num">1</div>
+        <div class="incon-body">
+          <strong>⚠️ Pagination key — <code>pagination</code> vs. <code>meta</code></strong>
+          The collection overview documentation says paginated lists return a <code>pagination</code> key. Every saved response example uses <code>meta</code> (and <code>links</code> on submissions). The frontend currently accepts both keys.
+          <br /><br />
+          <strong>Action:</strong> Standardise on <code>meta</code> + <code>links</code> across all paginated endpoints. Remove the <code>pagination</code> key from all documentation.
+        </div>
+      </li>
+      <li>
+        <div class="incon-num">2</div>
+        <div class="incon-body">
+          <strong>⚠️ Accept invitation — two conflicting request body shapes</strong>
+          <code>POST /api/v1/public/invitations/accept</code> appears twice with different bodies:
+          <ul style="margin:8px 0 0 16px;font-size:.85rem;">
+            <li>Public › Admin Invitations: <code>{ token, full_name, password, password_confirmation }</code></li>
+            <li>Admin › Admin Management: <code>{ token, first_name, last_name, password, password_confirmation }</code></li>
+          </ul>
+          <strong>Action:</strong> Decide on one canonical body. The frontend uses <code>first_name</code> + <code>last_name</code>.
+        </div>
+      </li>
+      <li>
+        <div class="incon-num">3</div>
+        <div class="incon-body">
+          <strong>⚠️ Submissions URL prefix — no <code>/api/v1</code></strong>
+          Every endpoint uses <code>{{base_url}}/api/v1/…</code>. All submission and submission-action routes use <code>{{base_url}}/admin/submissions/…</code> (no <code>/api/v1</code>).
+          <br /><br />
+          <strong>Action:</strong> Confirm whether the submissions routes intentionally skip the <code>/api/v1</code> prefix. If not intentional, update to <code>/api/v1/admin/submissions/…</code>.
+        </div>
+      </li>
+      <li>
+        <div class="incon-num">4</div>
+        <div class="incon-body">
+          <strong>❌ Admin login uses public login URL — no way to distinguish intent</strong>
+          "Admin Login" in the collection uses <code>POST /api/v1/public/auth/login</code>, identical to public login. The CMS now uses <code>POST /api/auth/login</code> (a separate CMS auth namespace).
+          <br /><br />
+          <strong>Action:</strong> Confirm whether <code>/api/auth/login</code> is the canonical admin login URL and add it to the collection. Clarify the relationship between <code>/api/v1/public/auth/login</code> and <code>/api/auth/login</code>.
+        </div>
+      </li>
+      <li>
+        <div class="incon-num">5</div>
+        <div class="incon-body">
+          <strong>⚠️ Duplicate response fields in three endpoints</strong>
+          <ul style="margin:8px 0 0 16px;font-size:.85rem;">
+            <li><code>GET /admin/admins/stats</code>: both <code>pending_invites</code> and <code>pending_invitations</code> carry the same value.</li>
+            <li><code>GET /admin/invitations/preview</code>: both <code>default_body</code> and <code>preview_body</code> are identical strings.</li>
+            <li><code>GET /admin/submissions/stats</code>: both <code>by_status</code> (rich objects) and <code>status_counts</code> (plain integers) carry the same data in different shapes.</li>
+          </ul>
+          <strong>Action:</strong> Remove the duplicate field from each response.
+        </div>
+      </li>
+      <li>
+        <div class="incon-num">6</div>
+        <div class="incon-body">
+          <strong>⚠️ Date format inconsistency across responses</strong>
+          Three different formats appear: ISO 8601, human-readable <code>"May 10, 2026"</code>, and long-form human <code>"Monday, 12 October 2026"</code>.
+          <br /><br />
+          <strong>Action:</strong> Standardise all machine-readable date fields on ISO 8601 UTC. If a human-readable string is needed for display, name it clearly (e.g. <code>expires_at_label</code>) alongside the ISO field.
+        </div>
+      </li>
+      <li>
+        <div class="incon-num">7</div>
+        <div class="incon-body">
+          <strong>❌ Missing response body documentation for the majority of endpoints</strong>
+          The following endpoints have <strong>no saved example response</strong> in the Postman collection:
+          <ul style="margin:8px 0 0 16px;font-size:.85rem;columns:2;gap:16px;">
+            <li><code>POST register/citizen</code></li>
+            <li><code>POST register/civil-servant</code></li>
+            <li><code>POST auth/login</code></li>
+            <li><code>GET auth/me</code></li>
+            <li><code>GET /public/sectors</code></li>
+            <li><code>GET /public/lgas</code></li>
+            <li><code>GET /public/mdas</code></li>
+            <li><code>GET /public/forms/current</code></li>
+            <li><code>POST /forms/{code}/submit</code></li>
+            <li><code>POST /media/upload</code></li>
+            <li>All message preview endpoints</li>
+            <li><code>GET /admin/submissions/{code}</code></li>
+            <li>All comment endpoints</li>
+            <li>Every single submission action</li>
+            <li>Every bulk submission action</li>
+            <li><code>GET /admin/profile</code></li>
+            <li>All Events/Fields/History endpoints</li>
+            <li><code>GET /admin/users</code></li>
+          </ul>
+          <strong>Action:</strong> Add at least one saved success example and one error example (422 or 404) for each of the above.
+        </div>
+      </li>
+      <li>
+        <div class="incon-num">8</div>
+        <div class="incon-body">
+          <strong>⚠️ <code>file</code> missing from field type enum</strong>
+          The spec for <code>POST /admin/events/{code}/fields</code> lists supported <code>field_type</code> values without <code>file</code>, yet the submit endpoint handles file-upload field answers.
+          <br /><br />
+          <strong>Action:</strong> Add <code>file</code> to the <code>field_type</code> enum for event fields.
+        </div>
+      </li>
+      <li>
+        <div class="incon-num">9</div>
+        <div class="incon-body">
+          <strong>⚠️ Single and batch invite share a URL with incompatible bodies</strong>
+          <code>POST /api/v1/admin/invitations</code> serves both single (<code>{ name, email, role }</code>) and batch (<code>{ emails[], role, … }</code>) invites with completely different body shapes.
+          <br /><br />
+          <strong>Action:</strong> Either split into two distinct URLs (<code>/invitations</code> and <code>/invitations/batch</code>), or add a discriminator field (e.g. <code>"mode": "single" | "batch"</code>).
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════════
+       SECTION 6 — PRIORITY MATRIX
+  ═════════════════════════════════════════════════════════════ -->
+  <section class="section" id="s6">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <div>
+        <div class="section-title">Priority Matrix</div>
+        <div class="section-lead">Recommended delivery order. P1 items block functional use of one or both apps. P2 unblocks important features. P3 is content &amp; polish.</div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>Priority</th><th>Item</th><th>Blocks</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr class="matrix-p1">
+            <td><span class="badge badge-p1">P1</span></td>
+            <td>Confirm media upload response key (<code>path</code> / <code>file_path</code>)</td>
+            <td>Idea submission file uploads</td>
+            <td>One-line fix in backend response; unblocks public site idea flow. §3J</td>
+          </tr>
+          <tr class="matrix-p1">
+            <td><span class="badge badge-p1">P1</span></td>
+            <td>Confirm registration response shape (<code>token</code> + <code>form?</code>)</td>
+            <td>Idea submission register-then-submit flow</td>
+            <td>Add a saved example to Postman. §3K</td>
+          </tr>
+          <tr class="matrix-p1">
+            <td><span class="badge badge-p1">P1</span></td>
+            <td>Confirm <code>means_of_id_type</code> enum for LASRRA</td>
+            <td>Citizen &amp; civil servant registration</td>
+            <td>Either add <code>lasrra</code> to enum or confirm <code>national_id</code>. §3E</td>
+          </tr>
+          <tr class="matrix-p1">
+            <td><span class="badge badge-p1">P1</span></td>
+            <td>Load page content from API on Editor mount</td>
+            <td>CMS multi-user editing; real content on live site</td>
+            <td>Currently uses seed data only. §4.6</td>
+          </tr>
+          <tr class="matrix-p1">
+            <td><span class="badge badge-p1">P1</span></td>
+            <td>Service Charters CRUD (9 endpoints)</td>
+            <td>Entire charters feature</td>
+            <td>Core editorial workflow. §4.4</td>
+          </tr>
+          <tr class="matrix-p1">
+            <td><span class="badge badge-p1">P1</span></td>
+            <td>CMS login UI / OTP mismatch resolution</td>
+            <td>Admin UX — confusing "enter password in code boxes" workaround</td>
+            <td>Either add OTP endpoints or update UI copy. §4.1</td>
+          </tr>
+          <tr class="matrix-p2">
+            <td><span class="badge badge-p2">P2</span></td>
+            <td>Pages list — hydrate from API on mount</td>
+            <td>CMS Pages view shows real content; multi-admin sync</td>
+            <td>§4.3</td>
+          </tr>
+          <tr class="matrix-p2">
+            <td><span class="badge badge-p2">P2</span></td>
+            <td>Newsletter subscription endpoint</td>
+            <td>Footer newsletter form</td>
+            <td>Simple email capture. §3A</td>
+          </tr>
+          <tr class="matrix-p2">
+            <td><span class="badge badge-p2">P2</span></td>
+            <td>Feedback submission endpoint</td>
+            <td>FeedbackFab + footer link</td>
+            <td>Anonymous feedback, needs reference code. §3B</td>
+          </tr>
+          <tr class="matrix-p2">
+            <td><span class="badge badge-p2">P2</span></td>
+            <td>Feedback submissions admin view</td>
+            <td>CMS: no way to read citizen feedback</td>
+            <td>API methods exist; view needs building. §4.8</td>
+          </tr>
+          <tr class="matrix-p2">
+            <td><span class="badge badge-p2">P2</span></td>
+            <td>Contact MCSD requests admin view</td>
+            <td>CMS: no way to read MCS contact requests</td>
+            <td>API methods exist; view needs building. §4.8</td>
+          </tr>
+          <tr class="matrix-p2">
+            <td><span class="badge badge-p2">P2</span></td>
+            <td>Department field on admin invitations</td>
+            <td>CMS invite admin flow</td>
+            <td>Add optional <code>department</code> param. §4.7</td>
+          </tr>
+          <tr class="matrix-p2">
+            <td><span class="badge badge-p2">P2</span></td>
+            <td>Confirm role name mapping (editor/super → admin/super_admin)</td>
+            <td>CMS admin role display &amp; invite</td>
+            <td>Config-level change. §4.7</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Newsletter subscribers admin view</td>
+            <td>CMS: no way to view or export subscribers</td>
+            <td>API method exists; view needs building. §4.8</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Public content APIs (news, gallery, impact stats)</td>
+            <td>Live content on public site</td>
+            <td>Blocked on CMS Pages/Media being complete first. §3D</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Ideas Day public endpoint</td>
+            <td>Ideas Day banner on public site</td>
+            <td>Reads existing <code>idea_day_*</code> fields from active event. §3D</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Contact / MCS form endpoint</td>
+            <td>MCS department contact form</td>
+            <td>§3C</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Public charter read endpoints</td>
+            <td>BOS department charter listing</td>
+            <td>Requires §4.4 first.</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Standardise pagination key to <code>meta</code></td>
+            <td>Consistency; frontend handles both</td>
+            <td>§5, item 1</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Standardise all date fields to ISO 8601</td>
+            <td>Sorting, filtering, localisation</td>
+            <td>§5, item 6</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Add saved response examples for 20+ undocumented endpoints</td>
+            <td>Frontend type safety; integration testing</td>
+            <td>§5, item 7</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Resolve accept-invitation body conflict</td>
+            <td>Onboarding flow correctness</td>
+            <td>§5, item 2</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Add <code>file</code> to field type enum</td>
+            <td>File-upload questions in form builder</td>
+            <td>§5, item 8</td>
+          </tr>
+          <tr class="matrix-p3">
+            <td><span class="badge badge-p3">P3</span></td>
+            <td>Split or disambiguate single vs. batch invite URL</td>
+            <td>Client-side type safety</td>
+            <td>§5, item 9</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout callout-ok" style="margin-top:28px;">
+      <span class="callout-icon">✅</span>
+      <div>
+        <strong>What is working and needs no new endpoints:</strong>
+        Citizen and civil servant registration; public login/logout; admin login (password-based via CMS OTP UI);
+        admin profile; all 78 idea-submission review endpoints (list, stats, detail, export, comments, single/bulk actions, events, fields, history, reference data admin, public users, invitations);
+        CMS gallery CRUD (create/list/update/toggle/delete/upload images);
+        CMS page publish; CMS section auto-save and visibility toggle;
+        CMS department admins (list, invite, deactivate, reactivate, resend, revoke);
+        CMS overview dashboard stats (<code>GET /api/admin/dashboard</code>);
+        CMS activity log (<code>GET /api/admin/activity</code>);
+        CMS charters list (<code>GET /api/admin/charters</code>).
+      </div>
+    </div>
+  </section>
+
+  <footer style="border-top:2px solid var(--green-mid);padding:28px 0;margin-top:16px;font-size:.8rem;color:var(--text-muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <span>OTCI Platform Engineering · Backend API Gaps &amp; Requirements · v2.1 · November 10, 2026</span>
+    <span>For questions, contact the frontend team or reference the Postman collection in the Mydeslynk workspace.</span>
+  </footer>
+
+</div><!-- /.page-wrap -->
+</body>
+</html>

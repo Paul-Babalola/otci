@@ -24,7 +24,7 @@ export const session = {
    * @param {{ email: string, password: string }} creds
    */
   login: async (creds, opts) => {
-    const data = await call(`${API_PREFIX}/public/auth/login`, { method: 'POST', body: creds, ...opts });
+    const data = await call(`${API_PREFIX}/admin/login`, { method: 'POST', body: creds, ...opts });
     if (data && data.token) setToken('admin', data.token);
     return data;
   },

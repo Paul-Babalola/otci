@@ -1,4 +1,5 @@
 /* Footer clock, reveal and newsletter form — ported verbatim. */
+import { cmsNewsletter } from '../api/index.js';
 export function mountFooterFx(f){if(!f)return ()=>{};
  /* The clock restarts on every mount; the DOM listeners below are wired once
     per footer element so a dev-mode double mount can't double-bind them. */
@@ -7,8 +8,9 @@ export function mountFooterFx(f){if(!f)return ()=>{};
  const fm=document.getElementById('ftNews'),em=document.getElementById('ftEmail'),msg=document.getElementById('ftMsg');
  if(!fm||!em||!msg||f._bf)return ()=>{clearInterval(f._ck)};
  f._bf=1;
- fm.addEventListener('submit',e=>{e.preventDefault();const v=em.value.trim();if(!/^\S+@\S+\.\S+$/.test(v)){fm.classList.remove('shake');void fm.offsetWidth;fm.classList.add('shake');msg.className='ft-msg err';msg.textContent='Enter a valid email address, like name@example.com.';em.focus();return}
-  msg.className='ft-msg ok';msg.textContent='You’re subscribed. The next briefing will land in your inbox.';fm.classList.remove('done');void fm.offsetWidth;fm.classList.add('done');fm.reset()});
+ fm.addEventListener('submit',e=>{e.preventDefault();if(fm._busy)return;const v=em.value.trim();if(!/^\S+@\S+\.\S+$/.test(v)){fm.classList.remove('shake');void fm.offsetWidth;fm.classList.add('shake');msg.className='ft-msg err';msg.textContent='Enter a valid email address, like name@example.com.';em.focus();return}
+  fm._busy=true;msg.className='ft-msg';msg.textContent='';
+  cmsNewsletter.subscribe(v).then(()=>{msg.className='ft-msg ok';msg.textContent='You’re subscribed. The next briefing will land in your inbox.';fm.classList.remove('done');void fm.offsetWidth;fm.classList.add('done');fm.reset()}).catch(err=>{fm.classList.remove('shake');void fm.offsetWidth;fm.classList.add('shake');msg.className='ft-msg err';msg.textContent=err&&err.message||'Something went wrong. Please try again.';em.focus()}).finally(()=>{fm._busy=false})});
  em.addEventListener('input',()=>{if(msg.classList.contains('err')){msg.textContent='';msg.className='ft-msg'}});
  {const tt=document.getElementById('toTop');tt&&tt.addEventListener('click',()=>scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}));}
 

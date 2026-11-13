@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar.jsx';
 import LandingPage from './components/LandingPage.jsx';
 import AboutPage from './components/AboutPage.jsx';
@@ -9,6 +10,7 @@ import Modal from './components/ui/Modal.jsx';
 import Toast from './components/ui/Toast.jsx';
 import Lightbox from './components/ui/Lightbox.jsx';
 import FeedbackFab from './components/ui/FeedbackFab.jsx';
+import IdeaFormModal from './components/ui/IdeaFormModal.jsx';
 import useScrollProgress from './hooks/useScrollProgress.js';
 import useNavPill from './hooks/useNavPill.js';
 import useHighlightPreview from './hooks/useHighlightPreview.js';
@@ -21,10 +23,23 @@ import useHashRoute from './hooks/useHashRoute.js';
  */
 export default function App() {
   const { route, sub } = useHashRoute();
+  const [showIdea, setShowIdea] = useState(false);
 
   useScrollProgress();
   useNavPill();
   useHighlightPreview();
+
+  // Intercept data-act="idea" clicks in the capture phase so they open the
+  // React modal instead of engine.js's innerHTML-based modal.
+  useEffect(() => {
+    const handler = (e) => {
+      if (!e.target.closest('[data-act="idea"]')) return;
+      e.stopImmediatePropagation();
+      setShowIdea(true);
+    };
+    document.addEventListener('click', handler, true);
+    return () => document.removeEventListener('click', handler, true);
+  }, []);
 
   const page = route === 'about' ? <AboutPage />
     : route === 'gallery' ? <GalleryPage view={sub === 'videos' ? 'videos' : 'photos'} />
@@ -44,6 +59,7 @@ export default function App() {
       <Modal />
       <Toast />
       <Lightbox />
+      <IdeaFormModal open={showIdea} onClose={() => setShowIdea(false)} />
     </>
   );
 }

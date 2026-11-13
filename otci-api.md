@@ -34,7 +34,7 @@
 `{{base_url}}`, `{{user_token}}`, `{{admin_token}}`, `{{event_code}}`, `{{form_code}}`, `{{field_code}}`, `{{snapshot_code}}`, `{{sector_code}}`, `{{mda_code}}`, `{{submission_code}}`, `{{admin_code}}`, `{{invitation_id}}`, `{{invitation_token}}`
 
 ### URL prefix note
-Every endpoint uses `{{base_url}}/api/v1/...` **except** the Admin › Submissions, Single/Bulk Submission Actions and Message Previews groups, which are written in the collection as `{{base_url}}/admin/submissions/...` (no `/api/v1`). Confirm with the backend whether that is intentional.
+**Updated 9 Nov 2026:** All endpoints now use `{{base_url}}/api/v1/...`, including Admin › Submissions, Single/Bulk Submission Actions and Message Previews (`/api/v1/admin/submissions/...`). The old `/admin/submissions/...` prefix (without `/api/v1`) is no longer in the collection.
 
 ---
 
@@ -817,9 +817,11 @@ Universal bulk status transition endpoint supporting any valid status transition
 ## 9. Admin — Auth
 
 ### POST Login
-`POST {{base_url}}/api/v1/public/auth/login`
+`POST {{base_url}}/api/v1/admin/login`
 
 Authenticate an admin user. Returns a Sanctum token. Only accounts with `is_admin = true` can log in here.
+
+> **Updated 9 Nov 2026:** Admin login is now a dedicated endpoint, no longer shared with Public › Auth › Login.
 
 ```json
 {
@@ -827,8 +829,6 @@ Authenticate an admin user. Returns a Sanctum token. Only accounts with `is_admi
   "password": "password"
 }
 ```
-
-> Same URL as Public › Auth › Login.
 
 ---
 
@@ -1568,6 +1568,6 @@ These come straight from contradictions or gaps inside the collection itself:
 
 1. **Pagination key** — collection overview says `pagination`; saved examples show `meta` (+ `links` on submissions).
 2. **Accept invitation body** — `full_name` (Public › Admin Invitations) vs `first_name` + `last_name` (Admin Management) for the same URL, with different response shapes.
-3. **`/admin/submissions` prefix** — submission routes have no `/api/v1` while every other route does.
+3. ~~**`/admin/submissions` prefix**~~ — Resolved (9 Nov 2026): all admin routes including submissions are now under `/api/v1/admin/…`.
 4. **Response bodies not documented** for: Register (both), Login, Me, List Sectors/LGAs/MDAs, Get Current Active Form, Submit Idea, Direct Media Upload, message previews, Get Single Submission, comments, all single/bulk actions, Admin Profile, admin reference data, all Events/Fields/History endpoints, and List Public Users.
 5. **Invalid/expired token response** for Validate Invitation Token exists in the collection but its body wasn't visible in the docs view.

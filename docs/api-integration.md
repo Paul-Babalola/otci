@@ -79,9 +79,9 @@ Behaviour worth knowing:
 ## Problems in the spec (confirm with the backend)
 
 1. **Pagination key.** The overview says `pagination`; the examples show `meta` (plus `links`). The client accepts both.
-2. **`/admin/submissions` has no `/api/v1`.** Every other route does. Probably a mistake in the collection. Configurable via `VITE_API_SUBMISSIONS_PREFIX`.
+2. ~~**`/admin/submissions` has no `/api/v1`.**~~ Resolved (9 Nov 2026): all admin routes including submissions are now under `/api/v1/admin/…`. `VITE_API_SUBMISSIONS_PREFIX` is set to `/api/v1`.
 3. **Accept invitation has two bodies.** `full_name` in one request, `first_name` + `last_name` in another, with different response shapes. `accept()` passes through whichever you send.
-4. **Admin login uses the public login URL.** There's no way to tell from the response alone whether the account is an admin. The client stores the token as admin, and the first admin call will 401/403 if it isn't.
+4. ~~**Admin login uses the public login URL.**~~ Resolved (9 Nov 2026): admin login is now `POST /api/v1/admin/login`, a dedicated endpoint that only admits `is_admin = true` accounts.
 5. **No `file` field type.** Submit Idea describes file-upload fields, but the field types for Add Field are `short_text | long_text | radio | checkbox | dropdown | multi_select | date | number`.
 6. **Upload response undocumented.** Submit needs the uploaded path; `uploadedPath()` guesses `path`, `file_path` or `relative_path`.
 7. **ID type enums differ.** Citizens: `national_id | passport | drivers_license | voters_card`. Civil servants send `staff_id`, which isn't listed anywhere.
