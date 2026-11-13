@@ -1,28 +1,39 @@
-// Home page content from the CMS (GET /api/pages/home), keyed by section type:
-// hero, metrics_bar, what_we_do, transformation_highlights, citizen_engagement_cta,
-// news_updates. Hidden sections are dropped. Null until loaded; the engine
-// templates fall back to their built-in copy when a field is missing.
+// Page content from the CMS (GET /api/pages/{slug}), keyed by section type.
+// Hidden sections are dropped. Null until loaded; the engine templates fall
+// back to their built-in copy when a field is missing.
+//
+// Engine page ids map to CMS slugs: ms → msd, everything else is 1:1.
 
 import { cmsPages } from '../api/index.js';
 
-let cache = null, promise = null;
+const SLUGS = { home: 'home', about: 'about', bos: 'bos', ci: 'ci', reforms: 'reforms', ms: 'msd' };
 
-export function getCmsHome() { return cache; }
+const cache = {}, promise = {};
 
-export function loadCmsHome() {
-  if (cache) return Promise.resolve(cache);
-  if (!promise) {
-    promise = cmsPages.get('home')
+export const cmsSlug = (pid) => SLUGS[pid] || null;
+
+export function getCmsPage(pid) { return cache[pid] || null; }
+
+export function loadCmsPage(pid) {
+  const slug = SLUGS[pid];
+  if (!slug) return Promise.resolve(null);
+  if (cache[pid]) return Promise.resolve(cache[pid]);
+  if (!promise[pid]) {
+    promise[pid] = cmsPages.get(slug)
       .then((d) => {
         const page = d && d.page ? d.page : d;
         const out = {};
         ((page && page.sections) || []).forEach((s) => {
           if (s && s.type && s.is_visible !== false) out[s.type] = s.content || {};
         });
-        cache = out;
+        cache[pid] = out;
         return out;
       })
-      .catch(() => { promise = null; return null; });
+      .catch(() => { promise[pid] = null; return null; });
   }
-  return promise;
+  return promise[pid];
 }
+
+// Back-compat aliases used by the homepage wiring.
+export const getCmsHome = () => getCmsPage('home');
+export const loadCmsHome = () => loadCmsPage('home');
