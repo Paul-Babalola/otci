@@ -378,6 +378,8 @@ export default function IdeaFormModal({ open, onClose }) {
           </svg>
         </button>
 
+        <div className="dlg-body">
+
         {/* ---- header ---- */}
         <div className="mh">
           <span className="mh-ic" aria-hidden="true">
@@ -778,6 +780,8 @@ export default function IdeaFormModal({ open, onClose }) {
             </div>
           </div>
         )}
+
+        </div>{/* dlg-body */}
       </div>
     </div>
   );
