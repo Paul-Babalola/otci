@@ -105,7 +105,7 @@ export const cmsContact = {
 // ---- service charters ----
 
 export const cmsCharters = {
-  list: (query, opts)     => cmsList('/api/charters', { query, ...opts }),
+  list: (query, opts)     => cmsCall('/api/charters', { query, ...opts }),
   get: (id, opts)         => cmsCall(`/api/charters/${seg(id)}`, opts),
   departments: (opts)     => cmsCall('/api/departments', opts),
 };

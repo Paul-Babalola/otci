@@ -1,6 +1,7 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { pages } from '../otci/engine.js';
 import useCmsPage from '../hooks/useCmsPage.js';
+import { cmsCharters } from '../api/index.js';
 import Page from './Page.jsx';
 
 /** The department page keys, in the order the nav lists them. */
@@ -21,13 +22,20 @@ export const DEPARTMENT_NAMES = {
  */
 export default function DepartmentPage({ dept }) {
   const cms = useCmsPage(dept);
+  const [charters, setCharters] = useState(null);
+  useEffect(() => {
+    if (dept !== 'bos') return;
+    let on = true;
+    cmsCharters.list().then((d) => { if (on) setCharters(d); }).catch(() => {});
+    return () => { on = false; };
+  }, [dept]);
   // The component instance is reused across department routes — track the
   // content seen at each route's first render so only a late CMS arrival
   // skips the scroll reset.
   const boot = useRef({});
   if (boot.current.pid !== dept) boot.current = { pid: dept, cms };
   const page = pages[dept];
-  const html = useMemo(() => (page ? page.html(cms) : ''), [page, cms]);
+  const html = useMemo(() => (page ? page.html(cms, charters) : ''), [page, cms, charters]);
   if (!page) return null;
   return <Page accent={page.accent} html={html} effectKey={`${dept}:${cms ? 'cms' : 'base'}`} scrollToTop={cms === boot.current.cms} />;
 }
