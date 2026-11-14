@@ -6,7 +6,7 @@
 
 import { cmsPages } from '../api/index.js';
 
-const SLUGS = { home: 'home', about: 'about', bos: 'bos', ci: 'ci', reforms: 'reforms', ms: 'msd' };
+const SLUGS = { home: 'home', about: 'about', bos: 'bos', ci: 'ci', reforms: 'reforms', ms: 'msd', 'non-technical': 'non-technical' };
 
 const cache = {}, promise = {};
 

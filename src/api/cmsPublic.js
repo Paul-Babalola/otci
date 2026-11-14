@@ -68,9 +68,11 @@ export const cmsPages = {
 // ---- gallery ----
 
 export const cmsGallery = {
-  list: (opts) => cmsList('/api/gallery', opts),
+  list: (opts) => cmsCall('/api/gallery', opts),
   get: (id, opts) => cmsCall(`/api/gallery/${seg(id)}`, opts),
 };
+
+export const cmsMediaUrl = (u) => { const s = String(u || '').trim(); return !s ? '' : /^https?:\/\//i.test(s) ? s : CMS_BASE + '/' + s.replace(/^\/+/, ''); };
 
 // ---- citizen feedback ----
 

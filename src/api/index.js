@@ -19,4 +19,4 @@ export {
   toPage, toFormData, saveBlob, request, call, list,
 } from './client.js';
 export { uploadedPath } from './public.js';
-export { cmsPages, cmsGallery, cmsFeedback, cmsNewsletter, cmsContact, cmsCharters } from './cmsPublic.js';
+export { cmsPages, cmsGallery, cmsMediaUrl, cmsFeedback, cmsNewsletter, cmsContact, cmsCharters } from './cmsPublic.js';
