@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { Fragment, useRef } from 'react';
 import Page from './Page.jsx';
 import useCmsHome from '../hooks/useCmsHome.js';
 
@@ -11,27 +11,26 @@ import Highlights from './sections/Highlights.jsx';
 import VoiceBand from './sections/VoiceBand.jsx';
 import News from './sections/News.jsx';
 
-/**
- * The landing page. Sections are independent components — reorder or drop any
- * of them and the rest keep working.
- *
- * Content comes from the CMS (GET /api/pages/home) with the built-in copy as
- * fallback. When the CMS data arrives after first paint the sections re-render
- * and the page effects re-run (without repeating the scroll reset).
- */
+const DEFAULT_ORDER = ['hero', 'what_we_do', 'metrics_bar', 'transformation_highlights', 'citizen_engagement_cta', 'news_updates'];
+
 export default function LandingPage() {
   const cms = useCmsHome();
   const boot = useRef(cms);
+  const order = cms?._order ?? DEFAULT_ORDER;
+
   return (
     <Page accent="#008751" effectKey={cms ? 'cms' : 'base'} scrollToTop={cms === boot.current}>
-      <LagosHero cms={cms} />
-      <Mandate cms={cms} />
-      <Process />
-      <Audience />
-      <Impact cms={cms} />
-      <Highlights cms={cms} />
-      <VoiceBand cms={cms} />
-      <News cms={cms} />
+      {order.map((type) => {
+        switch (type) {
+          case 'hero': return <LagosHero key={type} cms={cms} />;
+          case 'what_we_do': return <Fragment key={type}><Mandate cms={cms} /><Process /><Audience /></Fragment>;
+          case 'metrics_bar': return <Impact key={type} cms={cms} />;
+          case 'transformation_highlights': return <Highlights key={type} cms={cms} />;
+          case 'citizen_engagement_cta': return <VoiceBand key={type} cms={cms} />;
+          case 'news_updates': return <News key={type} cms={cms} />;
+          default: return null;
+        }
+      })}
     </Page>
   );
 }

@@ -22,10 +22,17 @@ export function loadCmsPage(pid) {
     promise[pid] = cmsPages.get(slug)
       .then((d) => {
         const page = d && d.page ? d.page : d;
+        const rawSections = (page && page.sections) || [];
+        const sorted = rawSections.slice().sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999));
         const out = {};
-        ((page && page.sections) || []).forEach((s) => {
-          if (s && s.type && s.is_visible !== false) out[s.type] = s.content || {};
+        const hidden = new Set();
+        sorted.forEach((s) => {
+          if (!s || !s.type) return;
+          out[s.type] = s.content || {};
+          if (s.is_visible === false) hidden.add(s.type);
         });
+        out._order = sorted.filter(s => s && s.type && s.is_visible !== false).map(s => s.type);
+        out._hidden = hidden;
         cache[pid] = out;
         return out;
       })
