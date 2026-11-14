@@ -89,7 +89,7 @@ export const cmsFeedback = {
 
 export const cmsNewsletter = {
   subscribe: (email, opts) =>
-    cmsCall('/api/newsletter/subscribe', { method: 'POST', body: { email }, ...opts }),
+    cmsCall('/api/newsletter/subscribe', { method: 'POST', body: { email, source: 'footer' }, ...opts }),
   unsubscribe: (token, opts) =>
     cmsCall('/api/newsletter/unsubscribe', { query: { token }, ...opts }),
 };
