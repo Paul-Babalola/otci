@@ -37,12 +37,14 @@ const newsSec=(cms)=>{
  const hT=nu.header&&nu.header.title?esc(nu.header.title):'News &amp; Updates';
  const hD=nu.header&&nu.header.description?esc(nu.header.description):'Press releases, event coverage and reform updates.';
  const cards=Array.isArray(nu.items)&&nu.items.length
-  ?nu.items.slice(0,6).map(it=>{const ext=/^https?:/i.test(it.article_link||'');return `<a class="nc2" href="${esc(it.article_link||'#home/news')}"${ext?' target="_blank" rel="noopener"':''}><div class="nc2-body"><div class="hc-row"><div><small>OTCI newsroom</small><h3>${esc(it.title||'')}</h3></div><span class="hc-pill">News</span></div><div class="nc2-img ph img" role="img" aria-label="Photo"${bgImg(it.image)}></div></div><div class="nc2-foot"><span>${esc(fmtDate(it.date))}</span><span>Read story <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div></a>`}).join('')
+  ?nu.items.slice(0,6).map(it=>{const ext=/^https?:/i.test(it.article_link||'');return `<a class="nc2" href="${esc(it.article_link||'#home/news')}"${ext?' target="_blank" rel="noopener"':''}><div class="nc2-body"><div class="hc-row"><div><small>OTCI newsroom</small><h3>${esc(it.title||'')}</h3></div><span class="hc-pill">${esc(it.tag||'News')}</span></div><div class="nc2-img ph img" role="img" aria-label="Photo"${bgImg(it.image)}></div></div><div class="nc2-foot"><span>${esc(fmtDate(it.date))}</span><span>Read story <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div></a>`}).join('')
   :NEWS.map(n=>`<a class="nc2" href="#home/news"><div class="nc2-body"><div class="hc-row"><div><small>OTCI newsroom</small><h3>${n[2]}</h3></div><span class="hc-pill">${n[0].charAt(0).toUpperCase()+n[0].slice(1).toLowerCase()}</span></div>${ph(n[3]).replace('class="ph ','class="nc2-img ph ')}</div><div class="nc2-foot"><span>${n[1]}</span><span>Read story <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></div></a>`).join('');
  return `<section id="news"><div class="wrap">${head(hT,hD,'plain')}<div class="news">${cards}</div></div></section>`};
 const voiceBand=(cms)=>{
  const c=cms&&cms.citizen_engagement_cta||{};
- return `<section class="gv" aria-labelledby="gvH"><div class="gv-stage"><canvas class="gv-cv" aria-hidden="true"></canvas><div class="gv-in"><p class="gv-k">BOS · Citizen feedback</p><h2 id="gvH">${esc(c.headline||'Your voice helps shape better services in Lagos')}</h2><p class="gv-p">${esc(c.subtext||`Report delays, praise great service and tell us what's working. Every submission is reviewed.`)}</p><button class="btn blue" data-act="feedback">${esc(c.cta_tag||'Share your experience')}</button></div></div></section>`};
+ const ctaLabel=esc(c.cta_tag||'Share your experience');
+ const ctaEl=c.cta_link?`<a class="btn blue" href="${esc(c.cta_link)}">${ctaLabel}</a>`:`<button class="btn blue" data-act="feedback">${ctaLabel}</button>`;
+ return `<section class="gv" aria-labelledby="gvH"><div class="gv-stage"><canvas class="gv-cv" aria-hidden="true"></canvas><div class="gv-in"><p class="gv-k">BOS · Citizen feedback</p><h2 id="gvH">${esc(c.headline||'Your voice helps shape better services in Lagos')}</h2><p class="gv-p">${esc(c.subtext||`Report delays, praise great service and tell us what's working. Every submission is reviewed.`)}</p>${ctaEl}</div></div></section>`};
 const videos=(n=4)=>`<div class="vids">${Array.from({length:n},(_,i)=>`<div class="vid"><button data-act="video" data-i="${i+1}" aria-label="Play press briefing ${i+1}">${`<div class="ph ${i?'p-ink':'p-sky'}"><span class="play">${I.play}</span></div>`}<p>Press briefing ${i+1}</p></button></div>`).join('')}</div>`;
 
 /* ---------------- data ---------------- */
@@ -672,19 +674,22 @@ function hwScene(){
  return `<svg class="hw-svg" viewBox="-440 -380 880 600" aria-hidden="true"><g id="hwCam"><g class="hw-grid">${grid}</g><g class="hw-plate">${hwBox(-3.4,-3.4,6.8,6.8,.35,{z:-.35,cls:'plate'})}</g><g class="hw-review"><polygon id="hwRing" points="${P2([[-3,-3,0],[3,-3,0],[3,3,0],[-3,3,0]])}"/></g>${routes}${body}${cubes}</g></svg>`}
 const HW_CH=[12,14,13,19,24,22,31,38,44,52,61,74,87];
 const HWDN=['Management Consulting Services','Reforms','Creativity & Innovation','BOS'];
-const processSec=`<section class="process hw" id="process" aria-label="How we work"><div class="stick"><div class="hw-grid2">
+const processSec=(cms)=>{
+ const hw=cms&&cms.how_we_work||{};
+ const rawSteps=Array.isArray(hw.steps)&&hw.steps.length?hw.steps:[];
+ return `<section class="process hw" id="process" aria-label="How we work"><div class="stick"><div class="hw-grid2">
  <div class="hw-l">
   <p class="hw-k"><span>How we work</span><span class="hw-ct" aria-hidden="true"><b id="hwCt">01</b> / 04</span></p>
-  <ol class="hw-list">${STEPS.map((s,k)=>{const x=PX[k];return `<li class="hw-it${k?'':' on'}" data-k="${k}"><i class="hw-rail" aria-hidden="true"><u></u></i>
-   <button type="button" class="hw-hd" data-k="${k}" aria-expanded="${k?'false':'true'}" aria-controls="hwp${k}"><span class="hw-no">0${k+1}</span><span class="hw-ti">${s[0]}</span><span class="hw-dp">${s[1]}</span></button>
-   <div class="hw-pn" id="hwp${k}"><div class="hw-pi"><p class="hw-d">${s[2]}</p><div class="hw-f"><div class="hw-st"><b data-count="${x[1]}">${x[1]}</b><span>${x[2]}</span></div><a class="hw-link" href="${s[3]}"${k?' tabindex="-1"':''}>Visit ${HWDN[k]}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></div></li>`}).join('')}</ol>
+  <ol class="hw-list">${STEPS.map((s,k)=>{const x=PX[k],rs=rawSteps[k]||{};return `<li class="hw-it${k?'':' on'}" data-k="${k}"><i class="hw-rail" aria-hidden="true"><u></u></i>
+   <button type="button" class="hw-hd" data-k="${k}" aria-expanded="${k?'false':'true'}" aria-controls="hwp${k}"><span class="hw-no">0${k+1}</span><span class="hw-ti">${rs.verb?esc(rs.verb):s[0]}</span><span class="hw-dp">${rs.dept?esc(rs.dept):s[1]}</span></button>
+   <div class="hw-pn" id="hwp${k}"><div class="hw-pi"><p class="hw-d">${rs.desc?esc(rs.desc):s[2]}</p><div class="hw-f"><div class="hw-st"><b data-count="${rs.value||x[1]}">${rs.value||x[1]}</b><span>${rs.label?esc(rs.label):x[2]}</span></div><a class="hw-link" href="${rs.link||s[3]}"${k?' tabindex="-1"':''}>Visit ${HWDN[k]}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></div></li>`}).join('')}</ol>
  </div>
  <div class="hw-r">${hwScene()}
   <div class="hw-chart" id="hwChart"><div class="hw-ch-h"><span>Service Charter compliance</span><em>All MDAs, last 12 months</em></div><b><span id="hwPct">0</span>%</b>
    <svg viewBox="0 0 300 120"><path class="hw-area" id="hwArea" d=""/><polyline class="hw-line" id="hwLine" pathLength="1" points="${HW_CH.map((v,i)=>`${(i*25).toFixed(0)},${(116-v*1.2).toFixed(1)}`).join(' ')}"/></svg>
    <div class="hw-mo">${['Oct','Dec','Feb','Apr','Jun','Aug','Oct'].map(m=>`<span>${m}</span>`).join('')}</div></div>
  </div>
-</div></div></section>`;
+</div></div></section>`};
 function hwUpdate(){const pr=$('#process.hw');if(!pr)return;
  const r=pr.getBoundingClientRect(),h=r.height-innerHeight,p=Math.max(0,Math.min(1,-r.top/Math.max(1,h)));
  const c=(v)=>Math.max(0,Math.min(1,v)),sm=x=>x*x*(3-2*x),s=p*4,i=Math.min(3,Math.floor(s));
@@ -786,12 +791,18 @@ const aRibRaw=(id,c,n=0)=>{const RMo=matchMedia('(prefers-reduced-motion: reduce
  ${[0,1,2,3].map(i=>`<path class="rdash" d="${P(i,0,6)}" fill="none" stroke="${c[3]}" stroke-opacity=".55" stroke-width=".9" stroke-dasharray="5 6"><animate attributeName="d" dur="${dur(i)}" begin="-${(off+i*.8).toFixed(1)}s" repeatCount="indefinite" calcMode="spline" keyTimes="0;.25;.5;.75;1" keySplines=".45 0 .55 1;.45 0 .55 1;.45 0 .55 1;.45 0 .55 1" values="${W.map(v=>P(i,v,6)).join(';')}"/></path>`).join('')}
  ${[0,1,2,3,4,5].map(n=>{const i=n%4;return `<g><circle r="6" fill="${c[3]==='#0A2E1F'?'#fff':'#fff'}" opacity=".35" filter="url(#${id}g)"/><circle r="1.8" fill="#fff"/><animateMotion dur="${(4.5+n*.9).toFixed(1)}s" begin="-${(n*1.3+off).toFixed(1)}s" repeatCount="indefinite" path="${P(i,0,6)}"/><animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.15;.8;1" dur="${(4.5+n*.9).toFixed(1)}s" begin="-${(n*1.3+off).toFixed(1)}s" repeatCount="indefinite"/></g>`}).join('')}</g></svg>`};
 const aRib=(id,c,n)=>{const t=aRibRaw(id,c,n);return matchMedia('(prefers-reduced-motion: reduce)').matches?t.replace(/<animate[A-Za-z]*\b[^>]*\/>/g,''):t};
-const audSec=`<section class="aud"><div class="wrap">${head('Built for everyone who keeps Lagos working','Three ways in, depending on who you are.','Get involved')}
+const audSec=(cms)=>{
+ const au=cms&&cms.audiences||{};
+ const hT=au.title?esc(au.title):'Built for everyone who keeps Lagos working';
+ const hD=au.desc?esc(au.desc):'Three ways in, depending on who you are.';
+ const cards=Array.isArray(au.cards)?au.cards:[];
+ const c0=cards[0]||{},c1=cards[1]||{},c2=cards[2]||{};
+ return `<section class="aud"><div class="wrap">${head(hT,hD,'Get involved')}
  <div class="aud-grid" style="margin-top:44px">
- <article class="acard a1"><span class="cm">For citizens</span><h3>Tell us how a service treated you. Every report is reviewed.</h3><button class="lnk" data-act="feedback">Share your experience →</button>${aRib('ra1',['#00A862','#5FE3A1','#FFFFFF','#fff'],0)}</article>
- <article class="acard a2"><span class="cm">For public servants</span><h3>Turn your best idea into the next Lagos service.</h3><button class="lnk" data-act="idea">Submit an idea →</button>${aRib('ra2',['#4CAB85','#CCE7DC','#FFFFFF','#fff'],1)}</article>
- <article class="acard a3"><span class="cm">For MDAs</span><h3>Get consultancy, job evaluation and process redesign support.</h3><a class="lnk" href="#ms/contact">Request support →</a>${aRib('ra3',['#008751','#339F74','#FFFFFF','#0A2E1F'],2)}</article>
- </div></div></section>`;
+ <article class="acard a1"><span class="cm">${esc(c0.tag||'For citizens')}</span><h3>${esc(c0.title||'Tell us how a service treated you. Every report is reviewed.')}</h3><button class="lnk" data-act="feedback">${esc(c0.cta||'Share your experience →')}</button>${aRib('ra1',['#00A862','#5FE3A1','#FFFFFF','#fff'],0)}</article>
+ <article class="acard a2"><span class="cm">${esc(c1.tag||'For public servants')}</span><h3>${esc(c1.title||'Turn your best idea into the next Lagos service.')}</h3><button class="lnk" data-act="idea">${esc(c1.cta||'Submit an idea →')}</button>${aRib('ra2',['#4CAB85','#CCE7DC','#FFFFFF','#fff'],1)}</article>
+ <article class="acard a3"><span class="cm">${esc(c2.tag||'For MDAs')}</span><h3>${esc(c2.title||'Get consultancy, job evaluation and process redesign support.')}</h3><a class="lnk" href="#ms/contact">${esc(c2.cta||'Request support →')}</a>${aRib('ra3',['#008751','#339F74','#FFFFFF','#0A2E1F'],2)}</article>
+ </div></div></section>`};
 
 const SLIDES=[["We are live!","Ideas Day 2026 submissions are open","Public servants and citizens can pitch homegrown ideas to improve services across Lagos.","bars"],
  ["New report","Quarterly Service Performance Report is out","See how MDAs performed against their Service Charter commitments.","moons"],
@@ -811,10 +822,14 @@ const impactSec=(cms)=>{
  const stats=Array.isArray(mb.stats)&&mb.stats.length
   ?mb.stats.slice(0,4).map(s=>[esc(s.label||''),esc(s.value||'')])
   :[['Citizen feedback received','250,000+'],['MDAs supported','220+'],['Reforms implemented','100+']];
+ const hd2=mb.title?esc(mb.title):'Public Service You Can See And Measure';
+ const desc2=mb.description?esc(mb.description):'Live programmes, published reports and the numbers behind them, updated as Lagos improves.';
+ const firstBtn=Array.isArray(mb.cta_buttons)&&mb.cta_buttons[0];
+ const ctaBtn=firstBtn?`<a class="btn blue" href="${esc(firstBtn.url||'#bos')}">${esc(firstBtn.label||'Explore service charters')}</a>`:`<a class="btn blue" href="#bos">Explore service charters</a>`;
  return `<section class="impact an" id="impact"><div class="wrap imp-grid">
- <div class="imp-l"><h2>Public Service You Can See And Measure</h2><p>Live programmes, published reports and the numbers behind them, updated as Lagos improves.</p>
+ <div class="imp-l"><h2>${hd2}</h2><p>${desc2}</p>
   <ul class="keyn">${stats.map(k=>`<li><span><i>→</i>${k[0]}</span><b data-count="${k[1]}">${k[1]}</b></li>`).join('')}</ul>
-  <a class="btn blue" href="#bos">Explore service charters</a></div>
+  ${ctaBtn}</div>
  <div class="ana">
   <div class="stage" id="stage" data-s="0" aria-live="polite">
    <div class="scn" data-i="0" aria-label="Citizen feedback">
@@ -871,10 +886,10 @@ const hlSec=(cms)=>{
  const cl=Array.isArray(th.highlights)?th.highlights:[];
  return `<section id="highlights" class="hl2"><div class="wrap">${head(hT,hD,'Highlights')}
 
- <div class="hli" role="list">${HL.map((h,k)=>{const c=HLC[h[1]],dn=h[1]==='Creativity & Innovation'?'Creativity &amp; Innovation':h[1],o=cl[k]||{};return `<a class="hr" role="listitem" data-d="${h[1]}" data-img="${h[4]}" href="${h[7]}" style="--dc:${h[5]};--i:${k}">
-  <span class="hr-ref"><b>${c[2]}-26-0${k+1}</b><span>${h[2]}</span></span>
+ <div class="hli" role="list">${HL.map((h,k)=>{const o=cl[k]||{},deptKey=o.dept||h[1],c=HLC[deptKey]||HLC[h[1]]||{},dn=deptKey==='Creativity & Innovation'?'Creativity &amp; Innovation':esc(deptKey);return `<a class="hr" role="listitem" data-d="${h[1]}" data-img="${h[4]}" href="${h[7]}" style="--dc:${h[5]};--i:${k}">
+  <span class="hr-ref"><b>${c[2]}-26-0${k+1}</b><span>${o.date?esc(o.date):h[2]}</span></span>
   <span class="hr-th ph img ${h[4]}"${bgImg(o.image)} aria-hidden="true"></span>
-  <span class="hr-main"><span class="hr-dept"><i></i>${dn}<em>${h[3]}</em></span><span class="hr-t">${o.title?esc(o.title):h[0]}</span><span class="hr-x">${HLX[k]}</span></span>
+  <span class="hr-main"><span class="hr-dept"><i></i>${dn}<em>${h[3]}</em></span><span class="hr-t">${o.title?esc(o.title):h[0]}</span><span class="hr-x">${o.summary?esc(o.summary):HLX[k]}</span></span>
   <span class="hr-go"><span class="hr-gl">${HLA[k]}</span><span class="hr-ar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"/></svg></span></span></a>`}).join('')}</div><div class="hl-prev" aria-hidden="true"><span class="hl-pv ph img"></span></div></div></section>`};
 
 /* ---------------- finder search ----------------
@@ -898,19 +913,24 @@ function renderHits(hits,q,sel){
 }
 /* ---------------- pages ---------------- */
 const P={};
-P.home={accent:'#008751',html:()=>`${lagosHero()}
-${mandSec()}
-${processSec}
-${audSec}
-${impactSec()}
-${hlSec()}
-${voiceBand()}${newsSec()}`};
-P.about={accent:'#008751',html:(cms)=>{const X=cms||{},H=X.hero||{},VM=X.vision_mission||{},LD=X.leadership_organization||{};const LB=paras(LD.body);const hidden=X._hidden||new Set();return `
+P.home={accent:'#008751',html:(cms)=>`${lagosHero(cms)}
+${mandSec(cms)}
+${processSec(cms)}
+${audSec(cms)}
+${impactSec(cms)}
+${hlSec(cms)}
+${voiceBand(cms)}${newsSec(cms)}`};
+P.about={accent:'#008751',html:(cms)=>{const X=cms||{},H=X.hero||{},VM=X.vision_mission||{},LD=X.leadership_organization||{},AH=X.about_hero||{},DEP=X.departments||{};const LB=paras(LD.body);const hidden=X._hidden||new Set();
+const defPhotos=[['i-plan','-.06','OTCI team reviewing plans'],['i-table','.04','Public servants in a working session'],['i-gov1','-.1','Government event']];
+const heroPhotos=Array.isArray(AH.images)&&AH.images.length?AH.images.slice(0,3).map((im,k)=>[im.img||defPhotos[k][0],defPhotos[k][1],im.caption||defPhotos[k][2]]):defPhotos;
+const DEF_DEPTS=[['#bos','BOS','Branding, One-Stop &amp; Service Charter','Service standards and citizen feedback','i-gov2'],['#ci','C&amp;I','Creativity &amp; Innovation','Ideas Day and idea incubation','i-cheer'],['#reforms','Reforms','Reforms Department','Performance and policy reform','i-table'],['#ms','MCSD','Management Consulting Services','Management support services across MDAs','i-headset']];
+const depCards=Array.isArray(DEP.cards)&&DEP.cards.length?DEP.cards.slice(0,4).map((c,k)=>{const fb=DEF_DEPTS[k]||DEF_DEPTS[0];return[c.link||fb[0],esc(c.tag||fb[1]),esc(c.title||fb[2]),esc(c.desc||fb[3]),c.img||fb[4]]}):DEF_DEPTS;
+return `
 <section class="ab-hero"><div class="wrap">
- <p class="ab-k"><i></i>About OTCI</p>
- <h1 class="ab-h" aria-label="A mandate for transformation, creativity and innovation"><span aria-hidden="true">A mandate for<br><span class="ab-rot"><span>transformation.</span><span>creativity.</span><span>innovation.</span></span></span></h1>
- <p class="ab-lede">We oversee the Lagos State Government's Public Service Reforms and embed a culture of creativity and innovation across every MDA.</p>
- <div class="ab-ph"><div class="ph img i-plan" data-sp="-.06" role="img" aria-label="OTCI team reviewing plans"></div><div class="ph img i-table" data-sp=".04" role="img" aria-label="Public servants in a working session"></div><div class="ph img i-gov1" data-sp="-.1" role="img" aria-label="Government event"></div></div>
+ <p class="ab-k"><i></i>${esc(AH.eyebrow||'About OTCI')}</p>
+ <h1 class="ab-h" aria-label="${AH.headline?esc(AH.headline):'A mandate for transformation, creativity and innovation'}"><span aria-hidden="true">A mandate for<br><span class="ab-rot"><span>transformation.</span><span>creativity.</span><span>innovation.</span></span></span></h1>
+ <p class="ab-lede">${esc(AH.subtext||"We oversee the Lagos State Government's Public Service Reforms and embed a culture of creativity and innovation across every MDA.")}</p>
+ <div class="ab-ph">${heroPhotos.map(p=>`<div class="ph img ${p[0]}" data-sp="${p[1]}" role="img" aria-label="${esc(p[2])}"></div>`).join('')}</div>
 </div></section>
 ${hidden.has('hero')?'':`<section class="ab-who"><div class="wrap">
  <div class="ab-who-g"><p class="ab-lab"><i></i>Who we are</p>
@@ -926,13 +946,13 @@ ${hidden.has('vision_mission')?'':`<section class="ab-vm"><div class="wrap ab-vm
 ${hidden.has('leadership_organization')?'':`<section class="ab-q"><div class="wrap ab-q-g">
  <div class="ab-q-t"><span class="ab-qm" aria-hidden="true">"</span>
   <blockquote><p><span>Transformation is not just a mandate. It is a journey</span> towards a public service that is innovative, agile and deeply committed to excellence.</p></blockquote>
-  <div class="ab-by"><b>${LD.leader_name?esc(LD.leader_name):'Special Adviser to the Governor'}</b><span>Office of Transformation, Creativity and Innovation</span></div>
+  <div class="ab-by"><b>${LD.leader_name?esc(LD.leader_name):'Special Adviser to the Governor'}</b><span>${esc(LD.leader_role||'Office of Transformation, Creativity and Innovation')}</span></div>
   <div class="ab-msg">${LB.length>1?LB.slice(1).map(x=>`<p>${esc(x)}</p>`).join(''):`<p>We are building systems that encourage creativity, reward performance and place the needs of citizens at the centre of everything we do.</p><p>By embracing new ideas and challenging conventional approaches, we are shaping a future where governance is not only effective, but truly transformative. Together, we are redefining what is possible for public service in Lagos State.</p>`}</div></div>
  <figure class="ab-q-f"><div class="ph img i-podium"${bgImg(LD.image)} role="img" aria-label="The Special Adviser speaking at an OTCI event"></div><svg class="ab-arc" viewBox="0 0 400 500" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M20 500 V200 A180 180 0 0 1 380 200 V500"/><path pathLength="1" d="M-40 430 C80 420 150 330 170 210 C185 120 250 60 330 40"/><path pathLength="1" d="M60 500 V230 A140 140 0 0 1 340 230"/></svg></figure>
 </div></section>`}
 <section class="ab-dep nt-sec" id="departments"><div class="wrap">
  <div class="ab-dep-h"><p class="ab-lab"><i></i>Departments and units</p><h2>Four departments, one mandate</h2></div>
- <div class="ab-dep-g">${[['#bos','BOS','Branding, One-Stop & Service Charter','Service standards and citizen feedback','i-gov2'],['#ci','C&I','Creativity & Innovation','Ideas Day and idea incubation','i-cheer'],['#reforms','Reforms','Reforms Department','Performance and policy reform','i-table'],['#ms','MCSD','Management Consulting Services','Management support services across MDAs','i-headset']].map((d,i)=>`<a class="ab-d" href="${d[0]}" style="--i:${i}"><span class="ab-dp ph img ${d[4]}" aria-hidden="true"><em>${d[1].replace('&','&amp;')}</em></span><b>${d[2].replace('&','&amp;')}</b><span>${d[3]}</span><span class="ab-dg">Visit department<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>`).join('')}</div>
+ <div class="ab-dep-g">${depCards.map((d,i)=>`<a class="ab-d" href="${d[0]}" style="--i:${i}"><span class="ab-dp ph img ${d[4]}" aria-hidden="true"><em>${d[1]}</em></span><b>${d[2]}</b><span>${d[3]}</span><span class="ab-dg">Visit department<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>`).join('')}</div>
  <a class="ab-nt" href="#non-technical"><span><b>Plus six non-technical departments</b><span>Admin &amp; HR, Planning, Audit, Procurement, ICT, and Finance &amp; Accounts keep the Office running.</span></span>${DPA}</a>
 </div></section>`}};
 
@@ -958,14 +978,14 @@ ${c.promise?`<section class="dp-q"><div class="wrap dp-q-g"><figure class="dp-cm
  <div class="dp-qt"><p class="dp-qk">Our promise</p><blockquote><p>${c.promise}</p></blockquote><span class="dp-rule" aria-hidden="true"></span><p class="dp-by"><b>${c.name}</b><span>Office of Transformation, Creativity &amp; Innovation</span></p></div></div></section>`:''}
 ${c.after||''}
 </div>`};
-const bubbles=`<section class="dp-loop"><div class="wrap dp-loop-g"><div><p class="ab-k"><i></i>Grievance redress</p><h2>Every voice is heard. <span>Every grievance is reviewed.</span></h2><p class="dp-ll">Citizens report delays, praise great service and ask questions. BOS logs each one against the MDA's Service Charter and follows it through to a response.</p><button type="button" class="btn white" data-act="feedback">Share your experience${DPA}</button></div>
- <div class="dp-stage" aria-hidden="true"><div class="dp-chat" id="dpChat"></div></div></div></section>`;
+const bubbles=(cms)=>{const gr=cms&&cms.grievance_redress||{};const eyebrow=gr.eyebrow?esc(gr.eyebrow):'Grievance redress';const hd=gr.title?`${esc(gr.title)}`:'Every voice is heard. <span>Every grievance is reviewed.</span>';const desc=gr.desc?esc(gr.desc):`Citizens report delays, praise great service and ask questions. BOS logs each one against the MDA's Service Charter and follows it through to a response.`;const firstBtn=Array.isArray(gr.cta_buttons)&&gr.cta_buttons[0];const btnLabel=firstBtn?esc(firstBtn.label||'Share your experience'):'Share your experience';return `<section class="dp-loop"><div class="wrap dp-loop-g"><div><p class="ab-k"><i></i>${eyebrow}</p><h2>${hd}</h2><p class="dp-ll">${desc}</p><button type="button" class="btn white" data-act="feedback">${btnLabel}${DPA}</button></div>
+ <div class="dp-stage" aria-hidden="true"><div class="dp-chat" id="dpChat"></div></div></div></section>`};
 const ciFn=`<section class="cf"><div class="wrap"><div class="cf-h"><h2>C&amp;I Function</h2></div><div class="cf-map"><svg class="cf-svg" viewBox="0 0 1080 620" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs><linearGradient id="cfS" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path class="cf-p cf-p-tl" d="M465 270H362q-24 0-24-24V174q0-24-24-24H232"/><path class="cf-q cf-q-tl" d="M465 270H362q-24 0-24-24V174q0-24-24-24H232" pathLength="1000" style="--d:0.0s"/><path class="cf-p cf-p-tr" d="M615 270H718q24 0 24-24V174q0-24 24-24H848"/><path class="cf-q cf-q-tr" d="M615 270H718q24 0 24-24V174q0-24 24-24H848" pathLength="1000" style="--d:0.9s"/><path class="cf-p cf-p-bl" d="M465 340H386q-24 0-24 24v72q0 24-24 24H232"/><path class="cf-q cf-q-bl" d="M465 340H386q-24 0-24 24v72q0 24-24 24H232" pathLength="1000" style="--d:1.8s"/><path class="cf-p cf-p-br" d="M615 340H694q24 0 24 24v72q0 24 24 24H848"/><path class="cf-q cf-q-br" d="M615 340H694q24 0 24 24v72q0 24 24 24H848" pathLength="1000" style="--d:2.7s"/><circle class="cf-port c" cx="465" cy="270" r="4"/><circle class="cf-port c" cx="615" cy="270" r="4"/><circle class="cf-port c" cx="465" cy="340" r="4"/><circle class="cf-port c" cx="615" cy="340" r="4"/><circle class="cf-port" cx="232" cy="150" r="3.5"/><circle class="cf-port" cx="848" cy="150" r="3.5"/><circle class="cf-port" cx="232" cy="460" r="3.5"/><circle class="cf-port" cx="848" cy="460" r="3.5"/></svg><div class="cf-chip" style="--x:50%;--y:49.19%" aria-hidden="true"><span class="cf-chip-i"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.2a5.9 5.9 0 0 0-3.5 10.6c.6.5 1 1.2 1 2V16.6h5v-.8c0-.8.4-1.5 1-2A5.9 5.9 0 0 0 12 3.2Z"/><path d="M10.2 13.2c0-1.3 1.8-1.6 1.8-3 0 1.4 1.8 1.7 1.8 3M9.8 19h4.4M10.6 21h2.8"/></svg><b>C&amp;I Functions</b></span></div><ul class="cf-ns" aria-label="C&amp;I functions"><li class="cf-n cf-tl" style="--x:15.74%;--y:24.19%"><span class="cf-dot"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/></svg></span><span class="cf-lb"><i>01</i><span>Distilling innovative ideas</span><small>Screening ideas from staff and citizens into workable proposals</small></span></li><li class="cf-n cf-tr" style="--x:84.26%;--y:24.19%"><span class="cf-dot"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M11 7 6 16M13 7l5 9M7.2 18h9.6"/></svg></span><span class="cf-lb"><i>02</i><span>Coordinating innovation across MDAs</span><small>Linking ministries and agencies so good ideas travel</small></span></li><li class="cf-n cf-bl" style="--x:15.74%;--y:74.19%"><span class="cf-dot"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 15c-1.4 1.4-2 5-2 5s3.6-.6 5-2"/><path d="M14.6 4.6C17 3.1 21 3 21 3s-.1 4-1.6 6.4L12.5 16 8 11.5z"/><path d="M8 11.5 5 11l2.5-3H11M12.5 16l.5 3 3-2.5V13"/><circle cx="15.8" cy="8.2" r="1.3"/></svg></span><span class="cf-lb"><i>03</i><span>Supporting idea implementation</span><small>Helping teams pilot, test and scale approved ideas</small></span></li><li class="cf-n cf-br" style="--x:84.26%;--y:74.19%"><span class="cf-dot"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V9l7-5 7 5v12"/><path d="M10 21v-5h4v5"/></svg></span><span class="cf-lb"><i>04</i><span>Running a creativity &amp; innovation hub</span><small>A shared space for ideation, training and prototyping</small></span></li></ul></div></div></section>`;
 const PGP=[['i-win24','Ideas Day 2024 winners on stage with the winning cheque'],['i-vip','Guests standing at the head table during Ideas Day'],['i-podium','A speaker at the Lagos State Government podium during Ideas Day']];
 const PGX=[['i-win24','Ideas Day 2024 winners on stage with the winning cheque'],['i-podium','A speaker at the Lagos State Government podium during Ideas Day'],['i-vip','Guests standing at the head table during Ideas Day'],['i-otci','Guests at an OTCI event'],['i-fa-aud','Public servants seated at an OTCI session'],['i-fa-spk','A speaker addressing an OTCI session'],['i-rf-grp','A group photo at an OTCI session']];
-const orbs=`<section class="dp-orbs pgx-sec"><div class="wrap"><div class="dp-fn-h"><p class="ab-lab"><i></i>Ideas Day</p><h2>Images from Idea Day</h2></div>
-<div class="pgx" id="pgx">${[0,1,2,3].map(c=>`<div class="pgx-c${c%2?' alt':''}">${[0,1].map(r=>{const k=c*2+r;if(k===7)return `<a class="pgx-t pgx-lk" href="#gallery" style="--i:${k}"><span>View Ideas Day photos</span>${DPN}</a>`;const [im,alt]=PGX[k];return `<figure class="pgx-t" style="--i:${k}"><span class="ph img ${im}" role="img" aria-label="${alt}"></span><figcaption>${alt}</figcaption></figure>`}).join('')}</div>`).join('')}</div>
-<div class="pgx-ft"><p class="pgx-k">(Ideas Day)</p><p class="pgx-d">Public servants across the Lagos State Public Service gather annually to present, celebrate, and champion innovation within the service.</p></div></div></section>`;
+const orbs=(cms)=>{const ig=cms&&cms.image_gallery||{};const imgs=Array.isArray(ig.images)&&ig.images.length?ig.images.slice(0,7).map(im=>[im.img||'',im.caption||'']): PGX.map(x=>[x[0],x[1]]);return `<section class="dp-orbs pgx-sec"><div class="wrap"><div class="dp-fn-h"><p class="ab-lab"><i></i>Ideas Day</p><h2>Images from Idea Day</h2></div>
+<div class="pgx" id="pgx">${[0,1,2,3].map(c=>`<div class="pgx-c${c%2?' alt':''}">${[0,1].map(r=>{const k=c*2+r;if(k===7)return `<a class="pgx-t pgx-lk" href="#gallery" style="--i:${k}"><span>View Ideas Day photos</span>${DPN}</a>`;const [im,alt]=imgs[k]||PGX[k]||['',''];return `<figure class="pgx-t" style="--i:${k}"><span class="ph img ${im}" role="img" aria-label="${esc(alt)}"></span><figcaption>${esc(alt)}</figcaption></figure>`}).join('')}</div>`).join('')}</div>
+<div class="pgx-ft"><p class="pgx-k">(Ideas Day)</p><p class="pgx-d">Public servants across the Lagos State Public Service gather annually to present, celebrate, and champion innovation within the service.</p></div></div></section>`};
 P.reforms={accent:'#008751',html:(cms)=>{const X=cms||{},H=X.hero||{},MB=X.metrics_bar||{},PO=X.program_overview||{},FA=X.focus_areas||{},BS=X.build_stronger_institutions||{},RR=X.reform_reports||{},PB=X.press_briefings||{};const hidden=X._hidden||new Set(),ord=X._order||null;return dept({code:'Reforms',name:'Reforms Department',title:H.headline?esc(H.headline):'Reforms Department',heroBg:H.background_image,dc:'#C9F27A',df:'#008751',img:'i-street',qimg:'i-podium',
  words:['Reforms','Department.'],lede:H.subtext?esc(H.subtext):'Enhancing MDA performance through robust performance reporting system that drives service delivery improvements, and accurately ensures optimal staff performance.',
  ctas:[{h:'#reforms/videos',t:'Watch briefings'},{h:'#about',t:'About OTCI'}],
@@ -975,15 +995,15 @@ P.reforms={accent:'#008751',html:(cms)=>{const X=cms||{},H=X.hero||{},MB=X.metri
  mid:hidden.has('focus_areas')?'':(`<section class="dp-fa"><div class="wrap"><div class="dp-fn-h"><h2>Focus Areas</h2></div><ul class="dp-fa-l">${(Array.isArray(FA.items)&&FA.items.length?FA.items.slice(0,4).map(it=>['',esc(it.description||''),it.image]):[['i-rf-lap','Performance evaluation and reform tracking'],['i-fa-sit','Productivity improvement strategies'],['i-rf-grp','Cost reduction in service delivery']]).map(([c,t,u],i)=>`<li style="--i:${i}"><span class="ph img ${c}"${bgImg(u)} aria-hidden="true"></span><b>${t}</b></li>`).join('')}</ul></div></section>`),
  numAfter:1,numH:'',stats:cmsStats(MB,[["120+","MDA Support Framework"],["80+","Efficiency Projects Completed"],["45+","MDAs Assisted"],["45+","Training Sessions Conducted"]]),
  fnK:'',fnH:'Building Stronger Institutions',fns:Array.isArray(BS.items)&&BS.items.length?BS.items.slice(0,4).map(it=>[esc(it.title||''),esc(it.content||it.description||'')]):[['Re-engineered processes','MDA workflows have been redesigned to eliminate redundancy, reduce processing times, and align institutional mandates with service delivery targets.'],['GovTech modernization','Digital tools and performance tracking systems are being embedded across Lagos State MDAs, replacing manual processes with data-driven governance.'],['Policy to impact execution','Reform policies are now tracked from design through implementation to measurable outcomes — ensuring government commitments translate into citizen impact.']],
- after:(()=>{const rrSec=hidden.has('reform_reports')?'':(`<section class="alt"><div class="wrap">${head(RR.title?esc(RR.title):'Reform Reports','Downloadable quarterly and annual reform progress reports for all OTCI departments.')}<div class="docs">${(Array.isArray(RR.reports)&&RR.reports.length?RR.reports.slice(0,6).map(r=>[esc(r.title||''),esc(r.description||''),mediaUrl(r.file)]):[["Service Charter Framework","A guide to citizen rights &amp; responsibilities across all Lagos State MDAs."],["OSPES Guidelines","Standards for front-line customer engagement"],["Grievance Redress Policy","How BOS handles, escalates, and resolves citizen complaints against MDAs."]]).map(d=>`<a class="doc" ${d[2]?`href="${esc(d[2])}" target="_blank" rel="noopener"`:'href="#reforms" data-act="doc"'}><span style="color:var(--blue)">${I.doc}</span><span><b>${d[0]}</b><span>${d[1]}</span></span></a>`).join('')}</div></div></section>`);const pbSec=hidden.has('press_briefings')?'':(`\n<section id="videos"><div class="wrap">${head(PB.title?esc(PB.title):'Press Briefing and Video Reports',PB.description?esc(PB.description):'Watch press briefings, event coverage, and reform explainer videos from the Reforms Department.')}${videos()}</div></section>`);return (ord||['reform_reports','press_briefings']).filter(t=>!hidden.has(t)).map(t=>t==='reform_reports'?rrSec:t==='press_briefings'?pbSec:'').join('');})()})}};
-P.bos={accent:'#4CAB85',html:(cms,chartersData)=>{const X=cms||{},H=X.hero||{},MB=X.metrics_bar||{},SCI=X.service_charter_intro||{},FF=X.feedback_form_config||{};const SCP=paras(SCI.description);const hidden=X._hidden||new Set(),ord=X._order||null;return dept({code:'BOS',name:'Branding, One-Stop &amp; Service Charter',title:H.headline?esc(H.headline):'Raising the Standard of Public Service in Lagos State',heroBg:H.background_image,dc:'#9BE6BF',df:'#1F7A55',img:'i-plan',qimg:'i-street',
+ after:(()=>{const rrSec=hidden.has('reform_reports')?'':(`<section class="alt"><div class="wrap">${head(RR.title?esc(RR.title):'Reform Reports','Downloadable quarterly and annual reform progress reports for all OTCI departments.')}<div class="docs">${(Array.isArray(RR.reports)&&RR.reports.length?RR.reports.slice(0,6).map(r=>[esc(r.title||''),esc(r.description||''),mediaUrl(r.file)]):[["Service Charter Framework","A guide to citizen rights &amp; responsibilities across all Lagos State MDAs."],["OSPES Guidelines","Standards for front-line customer engagement"],["Grievance Redress Policy","How BOS handles, escalates, and resolves citizen complaints against MDAs."]]).map(d=>`<a class="doc" ${d[2]?`href="${esc(d[2])}" target="_blank" rel="noopener"`:'href="#reforms" data-act="doc"'}><span style="color:var(--blue)">${I.doc}</span><span><b>${d[0]}</b><span>${d[1]}</span></span></a>`).join('')}</div></div></section>`);const pbSec=hidden.has('press_briefings')?'':(`\n<section id="videos"><div class="wrap">${head(PB.title?esc(PB.title):'Press Briefing and Video Reports',PB.description?esc(PB.description):'Watch press briefings, event coverage, and reform explainer videos from the Reforms Department.')}${Array.isArray(PB.items)&&PB.items.length?`<div class="vids">${PB.items.slice(0,8).map((it,i)=>`<div class="vid"><button data-act="video" data-i="${i+1}" aria-label="${esc(it.title||`Play press briefing ${i+1}`)}">${`<div class="ph ${i?'p-ink':'p-sky'}"${it.thumbnail?bgImg(it.thumbnail):''}><span class="play">${I.play}</span></div>`}<p>${esc(it.title||`Press briefing ${i+1}`)}</p></button></div>`).join('')}</div>`:videos()}</div></section>`);return (ord||['reform_reports','press_briefings']).filter(t=>!hidden.has(t)).map(t=>t==='reform_reports'?rrSec:t==='press_briefings'?pbSec:'').join('');})()})}};
+P.bos={accent:'#4CAB85',html:(cms,chartersData)=>{const X=cms||{},H=X.hero||{},MB=X.metrics_bar||{},SCI=X.service_charter_intro||{},FF=X.feedback_form_config||{},WD=X.what_we_do||{},SP=X.service_promise||{};const SCP=paras(SCI.description);const hidden=X._hidden||new Set(),ord=X._order||null;return dept({code:'BOS',name:'Branding, One-Stop &amp; Service Charter',title:H.headline?esc(H.headline):'Raising the Standard of Public Service in Lagos State',heroBg:H.background_image,dc:'#9BE6BF',df:'#1F7A55',img:'i-plan',qimg:'i-street',
  words:['Prompt.','Reliable.','Transparent.'],lede:H.subtext?esc(H.subtext):'Helping citizens experience prompt, reliable, courteous and transparent service, ensuring every MDA keeps its word through service charters and real feedback.',
  ctas:[{act:'feedback',t:'Share your experience'},{h:'#bos/standards',t:'Find a service'}],chip:MB.stats&&MB.stats[0]?[esc(MB.stats[0].value||''),esc(MB.stats[0].title||MB.stats[0].label||'')]:['120+','Service charters published'],
  stmt:SCP[1]?esc(SCP[1]):'The Service Charter is a public document that sets out what citizens can expect from each MDA: the services offered, how long they take, what they cost and how to complain when standards are not met.',whoP:SCP.length>2?SCP.slice(2).map(esc).join('</p><p class="dp-wp">'):(SCP[0]?esc(SCP[0]):''),
  numH:'Standards you can hold us to.',stats:cmsStats(MB,[["120+","Service charters"],["80+","MDAs onboarded"],["45+","One-stop shops"],["250,000+","Citizen feedback received"]]),
- fnH:'How BOS keeps every MDA to its word',fns:[['Service Charter','Driving implementation of the Service Charter across the Public Service.'],['Charter support','Helping MDAs draft, publish and review their charters.'],['Compliance monitoring','Checking standards through mystery shopping and citizen feedback.'],['Grievance redress','Logging breaches and tracking how each complaint is resolved.']],
- pulse:'What every citizen should expect from a Lagos State MDA.',promise:'Every MDA keeps its word, through service charters and real feedback.',
- extra:bubbles,after:(()=>{const feedbackSec=hidden.has('feedback_form_config')?'':(`<section class="fx" id="feedback"><div class="wrap fx-g">
+ fnH:'How BOS keeps every MDA to its word',fns:Array.isArray(WD.cards)&&WD.cards.length?WD.cards.slice(0,4).map(c=>[esc(c.title||''),esc(c.desc||'')]):[['Service Charter','Driving implementation of the Service Charter across the Public Service.'],['Charter support','Helping MDAs draft, publish and review their charters.'],['Compliance monitoring','Checking standards through mystery shopping and citizen feedback.'],['Grievance redress','Logging breaches and tracking how each complaint is resolved.']],
+ pulse:'What every citizen should expect from a Lagos State MDA.',promise:SP.quote?esc(SP.quote):'Every MDA keeps its word, through service charters and real feedback.',
+ extra:bubbles(cms),after:(()=>{const feedbackSec=hidden.has('feedback_form_config')?'':(`<section class="fx" id="feedback"><div class="wrap fx-g">
  <div class="fx-l"><p class="ab-lab"><i></i>Grievance mechanism</p><h2>Tell us about your visit</h2><p class="fx-s">Visited an MDA and met delays, poor service or unmet promises? Or found service worth praising? Find the MDA and tell us. BOS reviews every submission.</p>
   <div class="fx-ill" aria-hidden="true">${(()=>{const bld=hwBox(-1.6,-1.6,3.2,3.2,4.4,{win:1,cls:'hq'}),pl=hwBox(-3,-3,6,6,.3,{z:-.3,cls:'plate'}),p0=ip(-7.5,3.5,0),p1=ip(1.6,0,1.6);const path=`M${p0[0].toFixed(1)} ${p0[1].toFixed(1)} C${(p0[0]+40).toFixed(1)} ${(p0[1]-120).toFixed(1)} ${(p1[0]-40).toFixed(1)} ${(p1[1]-140).toFixed(1)} ${p1[0].toFixed(1)} ${p1[1].toFixed(1)}`;
  return `<svg viewBox="-230 -200 400 300"><g class="fx-pl">${pl}</g><g class="fx-hq">${bld}</g><path class="fx-path" d="${path}"/><g class="fx-pin" transform="translate(${p0[0].toFixed(1)} ${p0[1].toFixed(1)})"><ellipse rx="14" ry="5" class="fx-sh"/><circle cy="-22" r="9" class="fx-hd"/><path d="M-11 -2 Q-11 -14 0 -14 Q11 -14 11 -2Z" class="fx-bd"/></g><g class="fx-msg"><rect x="-16" y="-12" width="32" height="22" rx="7"/><path d="M-6 10 l-4 7 9-7z"/><circle cx="-7" cy="-1" r="2"/><circle cx="0" cy="-1" r="2"/><circle cx="7" cy="-1" r="2"/><animateMotion dur="5s" repeatCount="indefinite" keyTimes="0;.45;1" keyPoints="0;1;1" calcMode="spline" keySplines=".6 0 .3 1;0 0 1 1" path="${path}"/><animate attributeName="opacity" dur="5s" repeatCount="indefinite" values="0;1;1;0;0" keyTimes="0;.06;.42;.5;1"/></g><g class="fx-tick" transform="translate(${ip(0,0,6.4)[0].toFixed(1)} ${ip(0,0,6.4)[1].toFixed(1)})"><circle r="15"/><path d="M-6 0.5l4 4 8-8"/><animateTransform attributeName="transform" type="scale" additive="sum" dur="5s" repeatCount="indefinite" values="0;0;1.15;1;1;0" keyTimes="0;.48;.56;.62;.9;1"/></g></svg>`})()}</div>
@@ -1025,7 +1045,7 @@ P.ci={accent:'#E8873A',html:(cms)=>{const X=cms||{},H=X.hero||{},MB=X.metrics_ba
  whoCta:'<button type="button" class="btn blue" data-act="idea">'+(PO.cta_button_label?esc(PO.cta_button_label):'Suggest an idea')+DPA+'</button>',
   numH:'',stats:cmsStats(MB,[["120+","Number of ideas submitted"],["90+","Ideas evaluated"],["200+","Recognised public servants"]]),
  fnK:'',fnH:'Innovation in Numbers',fns:Array.isArray(NM.items)&&NM.items.length?NM.items.slice(0,4).map(it=>[esc(it.title||''),esc(it.description||'')]):[['Innovation incubation','Over 18 ideas selected are in active incubation, with 7 already deployed across MDA operations in Lagos State.'],['Civic &amp; Public-Sector Ideation','Citizens and public servants contribute ideas through the digital portal, creating a co-design approach to addressing existing governance challenges.'],['Digital transformation pilots','5 digital pilot projects are running across MDAs, leveraging technology to reduce paperwork, shorten queues, and improve data accuracy in service delivery.']],
- mid:ciFn,extraPre:orbs,after:hidden.has('final_cta')?'':(`<section class="band dark"><div class="wrap"><h2>${FC.headline?esc(FC.headline):'Join Hundreds Transforming Lagos State Through Innovation'}</h2><p>${FC.subtext?esc(FC.subtext):`Whether you're a public servant or a Lagos citizen, your ideas can reshape public service. Submit your idea and it could be selected for full incubation and implementation.`}</p><div class="cta-row" style="justify-content:center"><button class="btn blue" data-act="idea">Suggest a creative idea</button><a class="btn ghost" href="#gallery">View past winners</a></div></div></section>`)})}};
+ mid:ciFn,extraPre:orbs(cms),after:hidden.has('final_cta')?'':(`<section class="band dark"><div class="wrap"><h2>${FC.headline?esc(FC.headline):'Join Hundreds Transforming Lagos State Through Innovation'}</h2><p>${FC.subtext?esc(FC.subtext):`Whether you're a public servant or a Lagos citizen, your ideas can reshape public service. Submit your idea and it could be selected for full incubation and implementation.`}</p><div class="cta-row" style="justify-content:center"><button class="btn blue" data-act="idea">Suggest a creative idea</button><a class="btn ghost" href="#gallery">View past winners</a></div></div></section>`)})}};
 P.ms={accent:'#0A2E1F',html:(cms)=>{const X=cms||{},H=X.hero||{},MB=X.metrics_bar||{},PO=X.program_overview||{},IC=X.info_cards||{},FA=X.focus_areas||{},EW=X.enabling_whole_otci||{},FC=X.final_cta||{};const hidden=X._hidden||new Set(),ord=X._order||null;return dept({code:'MCSD',name:'Management Consulting Services Department (MCSD)',title:H.headline?esc(H.headline):'Supporting MDAs in fulfilling their mandates in line with rules, regulations and legislations',heroBg:H.background_image,dc:'#F2C14E',df:'#0F5A3E',img:'i-clap',qimg:'i-headset',
  words:['Supporting MDAs','in fulfilling','their mandates.'],lede:H.subtext?esc(H.subtext):'In line with rules, regulations and legislations — the Management Consulting Services Department acts as a catalyst for change, providing management support services across Lagos State MDAs.',
  ctas:[{act:'contact',t:'Contact MCSD'},{h:'#about',t:'About OTCI'}],
@@ -1117,7 +1137,7 @@ const ntBody=d=>{
   <div class="nt-cards">${d.groups.map((g,i)=>`<article class="nt-c nc rv" style="--i:${i}"><div class="nc-top"><span class="nc-ic">${ntSvg(ntIc(g[0]))}</span></div><h3>${g[0]}</h3><ul class="nc-rows">${g[1].map(x=>`<li>${x[0]}</li>`).join('')}</ul></article>`).join('')}</div>`;
  return '';
 };
-P['non-technical']={accent:'#008751',html:()=>`<div class="dp nt" style="--dc:#9BE6BF;--df:#0F5A3E">
+P['non-technical']={accent:'#008751',html:(cms)=>{const NTI=cms&&cms.nt_intro||{};return `<div class="dp nt" style="--dc:#9BE6BF;--df:#0F5A3E">
 <section class="dp-hero"><div class="dp-bg ph img i-desk" aria-hidden="true"></div><div class="wrap">
  <p class="dp-crumb"><a href="#about/departments">Departments</a><span aria-hidden="true">/</span><b>Non-technical</b></p>
  <h1 class="sr">Non-technical departments: the teams that keep the Office running</h1>
@@ -1128,7 +1148,7 @@ P['non-technical']={accent:'#008751',html:()=>`<div class="dp nt" style="--dc:#9
 <section class="nt-zm nt-sec" id="nt-index" aria-label="The six non-technical departments"><div class="nt-zm-st">
  <div class="nt-zm-ph" aria-hidden="true">${NT.map((d,i)=>`<div class="nt-zm-im${i?'':' on'}" data-k="${i}">${ntIll(i)}</div>`).join('')}<span class="nt-zm-cap">${NT.map((d,i)=>`<b data-k="${i}"${i?'':' class="on"'}>${d.name}</b>`).join('')}</span></div>
  <div class="wrap nt-zm-g">
-  <p class="nt-zm-lead">Technical departments deliver OTCI's mandate to MDAs and citizens. These six departments make that work possible, inside the Office.</p>
+  <p class="nt-zm-lead">${NTI.statement?esc(NTI.statement):'Technical departments deliver OTCI\'s mandate to MDAs and citizens. These six departments make that work possible, inside the Office.'}</p>
   <ol class="nt-zm-rows">${NT.map((d,i)=>{const f=(d.facts||[]).find(x=>/functions|stages/.test(x))||'',m=f.match(/^(\d+)\s+(.*)$/);return `<li data-k="${i}"><div class="nt-zm-a"><span class="nt-zm-n">${m?`<span class="odo" data-v="${m[1]}">${m[1].split('').map(()=>`<span class="odo-c"><span>${[0,1,2,3,4,5,6,7,8,9].map(x=>`<i>${x}</i>`).join('')}</span></span>`).join('')}</span><small>${m[2]}</small>`:''}</span><span class="nt-zm-t"><b>${d.name}</b><span>${d.line}</span></span></div></li>`}).join('')}</ol>
  </div>
 </div></section>
@@ -1138,7 +1158,7 @@ P['non-technical']={accent:'#008751',html:()=>`<div class="dp nt" style="--dc:#9
  <div class="nt-hz-vp"><ol class="nt-hz-tr">${NT.map((d,i)=>{const A=d.units?d.units.map(u=>u[0]):d.groups?d.groups.map(g=>g[0]):d.fns?d.fns.map(f=>f[1]):d.stages?d.stages.map(x=>x[0]):[];const sh=A,more=0;return `<li class="nt-hz-c" style="--i:${i}"><div class="nt-hz-ill">${ntIll(i)}</div><div class="nt-hz-b"><h3>${d.name}</h3><p>${d.purpose}</p>${d.facts?`<ul class="nt-hz-f">${d.facts.map(f=>`<li>${f}</li>`).join('')}</ul>`:''}<p class="nt-hz-k">${d.stages?'Stages, in order':'Covers'}</p><ul class="nt-hz-a${d.stages?' seq':''}">${sh.map(a=>`<li>${a}</li>`).join('')}${more>0?`<li class="mo">+${more} more</li>`:''}</ul></div></li>`}).join('')}</ol></div>
 </div></section>
 <section class="band slate"><div class="wrap"><h2>Looking for a technical department?</h2><p>BOS, Creativity &amp; Innovation, Reforms and Management Consulting Services lead OTCI's work with MDAs and citizens.</p><a class="btn ghost" href="#about/departments">See technical departments</a></div></section>
-</div>`};
+</div>`}};
 
 function pgFx(){const g=document.getElementById('pg');if(!g||g._on)return;g._on=1;
  const cells=[...g.querySelectorAll('.pg-c')],RMq=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1769,13 +1789,13 @@ export function bindHighlightFilter(){const h=(e)=>{const b=e.target.closest('.h
  document.addEventListener('click',h);return ()=>document.removeEventListener('click',h);}
 
 /* ---------------- exports ---------------- */
-export const homeHTML = () => `${lagosHero()}
-${mandSec()}
-${processSec}
-${audSec}
-${impactSec()}
-${hlSec()}
-${voiceBand()}${newsSec()}`;
+export const homeHTML = (cms) => `${lagosHero(cms)}
+${mandSec(cms)}
+${processSec(cms)}
+${audSec(cms)}
+${impactSec(cms)}
+${hlSec(cms)}
+${voiceBand(cms)}${newsSec(cms)}`;
 
 export const sections = {
   lagosHero, mandSec, processSec, audSec, impactSec, hlSec, voiceBand, newsSec

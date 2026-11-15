@@ -11,16 +11,19 @@ export default function GalleryPage({ view = 'photos' }) {
     cmsGallery.list().then(async (data) => {
       const folders = (data?.folders || []).filter((f) => f.is_visible !== false);
       if (!folders.length) return;
-      const folder = folders[0];
-      const detail = await cmsGallery.get(folder.id);
-      const photos = (detail?.images || [])
-        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-        .map((im) => cmsMediaUrl(im.url || ''))
-        .filter(Boolean);
-      if (photos.length) {
+      const details = await Promise.all(folders.map((f) => cmsGallery.get(f.id).catch(() => null)));
+      const allPhotos = [];
+      details.forEach((detail) => {
+        if (!detail) return;
+        (detail.images || [])
+          .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+          .forEach((im) => { const url = cmsMediaUrl(im.url || ''); if (url) allPhotos.push(url); });
+      });
+      if (allPhotos.length) {
+        const primary = folders[0];
         setGalleryData({
-          photos,
-          album: { title: folder.title || '', desc: folder.description || '' },
+          photos: allPhotos,
+          album: { title: primary.title || '', desc: primary.description || '' },
         });
       }
     }).catch(() => {});

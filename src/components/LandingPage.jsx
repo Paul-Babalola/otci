@@ -23,7 +23,7 @@ export default function LandingPage() {
       {order.map((type) => {
         switch (type) {
           case 'hero': return <LagosHero key={type} cms={cms} />;
-          case 'what_we_do': return <Fragment key={type}><Mandate cms={cms} /><Process /><Audience /></Fragment>;
+          case 'what_we_do': return <Fragment key={type}><Mandate cms={cms} /><Process cms={cms} /><Audience cms={cms} /></Fragment>;
           case 'metrics_bar': return <Impact key={type} cms={cms} />;
           case 'transformation_highlights': return <Highlights key={type} cms={cms} />;
           case 'citizen_engagement_cta': return <VoiceBand key={type} cms={cms} />;
